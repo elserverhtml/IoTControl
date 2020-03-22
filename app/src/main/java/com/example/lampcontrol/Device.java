@@ -1,6 +1,15 @@
 package com.example.lampcontrol;
 
+import android.content.Intent;
+
 abstract class Device {
+    final static  int IMAGE_BT_CONNECTED = R.drawable.ic_bluetooth_connected;
+    final static  int IMAGE_BT_DISCONNECTED = R.drawable.ic_bluetooth_disconnected;
+    final static  int IMAGE_WF_CONNECTED = R.drawable.ic_wifi_connected;
+    final static  int IMAGE_WF_DISCONNECTED = R.drawable.ic_wifi_disconnected;
+    final static  int IMAGE_DEVICE_ON = R.drawable.ic_device_on;
+    final static  int IMAGE_DEVICE_OFF = R.drawable.ic_device_off;
+
     private int image_connected;
     private int image_disconnected;
     private int image_deviceOn ;
@@ -12,22 +21,22 @@ abstract class Device {
 
     private boolean typeConnectionIsBluetooth;
     private String BT_MAC = "";
-    // wifi settings...
+    // TODO: wifi settings...
 
     Device(String name, boolean typeConnectionIsBluetooth) {
         this.name = name;
         this.typeConnectionIsBluetooth = typeConnectionIsBluetooth;
 
         if(this.typeConnectionIsBluetooth) {
-            this.image_connected = R.drawable.ic_bluetooth_connected;
-            this.image_disconnected = R.drawable.ic_bluetooth_disconnected;
+            this.image_connected = Device.IMAGE_BT_CONNECTED;
+            this.image_disconnected = Device.IMAGE_BT_DISCONNECTED;
         } else {
-            this.image_connected = R.drawable.ic_wifi_connected;
-            this.image_disconnected = R.drawable.ic_wifi_disconnected;
+            this.image_connected = Device.IMAGE_WF_CONNECTED;
+            this.image_disconnected = Device.IMAGE_WF_DISCONNECTED;
         }
 
-        this.image_deviceOn = R.drawable.ic_device_on;
-        this.image_deviceOff = R.drawable.ic_device_off;
+        this.image_deviceOn = Device.IMAGE_DEVICE_ON;
+        this.image_deviceOff = Device.IMAGE_DEVICE_OFF;
     }
 
     Device(String name, boolean typeConnectionIsBluetooth, int image_deviceOn, int image_deviceOff) {
@@ -35,11 +44,11 @@ abstract class Device {
         this.typeConnectionIsBluetooth = typeConnectionIsBluetooth;
 
         if(this.typeConnectionIsBluetooth) {
-            this.image_connected = R.drawable.ic_bluetooth_connected;
-            this.image_disconnected = R.drawable.ic_bluetooth_disconnected;
+            this.image_connected = Device.IMAGE_BT_CONNECTED;
+            this.image_disconnected = Device.IMAGE_BT_DISCONNECTED;
         } else {
-            this.image_connected = R.drawable.ic_wifi_connected;
-            this.image_disconnected = R.drawable.ic_wifi_disconnected;
+            this.image_connected = Device.IMAGE_WF_CONNECTED;
+            this.image_disconnected = Device.IMAGE_WF_DISCONNECTED;
         }
 
         this.image_deviceOn = image_deviceOn;
@@ -49,7 +58,7 @@ abstract class Device {
     abstract void isConnectorOn();
     abstract void findDevices();
     abstract void connectDevice();
-    abstract void deviceMenu();
+    abstract Intent deviceMenu(Intent intent);
 
     void setName(String name){
         this.name = name;

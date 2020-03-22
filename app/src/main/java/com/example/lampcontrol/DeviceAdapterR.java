@@ -1,11 +1,14 @@
 package com.example.lampcontrol;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -16,7 +19,7 @@ public class DeviceAdapterR extends RecyclerView.Adapter<DeviceAdapterR.ViewHold
     private LayoutInflater inflater;
     private List<Device> devices;
 
-    public DeviceAdapterR(Context context, List<Device> devices) {
+    DeviceAdapterR(Context context, List<Device> devices) {
         this.inflater = LayoutInflater.from(context);
         this.devices = devices;
     }
@@ -49,15 +52,51 @@ public class DeviceAdapterR extends RecyclerView.Adapter<DeviceAdapterR.ViewHold
         return devices.size();
     }
 
-    static class ViewHolder extends RecyclerView.ViewHolder {
+    static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         final ImageView imageConnect, deviceStatus;
         final TextView nameView, textConnect;
+        final LinearLayout listDevice;
         ViewHolder(@NonNull View view){
             super(view);
+            listDevice = view.findViewById(R.id.list_device);
             nameView = view.findViewById(R.id.nameView);
             textConnect = view.findViewById(R.id.textConnect);
             imageConnect = view.findViewById(R.id.imageConnect);
             deviceStatus = view.findViewById(R.id.deviceStatus);
+
+            listDevice.setOnClickListener(this);
+            deviceStatus.setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View v) {
+            int position = getAdapterPosition();
+            if(position != RecyclerView.NO_POSITION) {
+                switch (v.getId()) {
+                    case R.id.list_device:
+                        deviceClick(v, position);
+                        break;
+                    case R.id.deviceStatus:
+                        statusClick(v, position);
+                        break;
+                }
+            }
+        }
+
+        private void deviceClick(View v, int position) {
+            Device selectedDevice = ((MainActivity) v.getContext()).getDevices().get(position);
+            Toast.makeText(v.getContext(), "Был выбран пункт " + selectedDevice.getName(),
+                    Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(v.getContext(), DeviceMenuActivity.class);
+            v.getContext().startActivity(intent);
+        }
+
+        private void statusClick(View v, int position) {
+            Device selectedDevice = ((MainActivity) v.getContext()).getDevices().get(position);
+            selectedDevice.setDeviceIsOn(!selectedDevice.isOn());
+            if(selectedDevice.isOn()) {
+                deviceStatus.setImageResource(selectedDevice.getImageDeviceOn());
+            } else deviceStatus.setImageResource(selectedDevice.getImageDeviceOff());
         }
     }
 }

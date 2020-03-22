@@ -1,5 +1,7 @@
 package com.example.lampcontrol;
 
+import android.content.Intent;
+
 import java.util.UUID;
 
 class BTDevice extends Device{
@@ -30,7 +32,7 @@ class BTDevice extends Device{
     }
 
     @Override
-    void deviceMenu() {
-
+    Intent deviceMenu(Intent intent) {
+        return intent;
     }
 }

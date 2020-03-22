@@ -3,9 +3,6 @@ package com.example.lampcontrol;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ListView;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
@@ -20,7 +17,6 @@ public class MainActivity extends AppCompatActivity {
     private List<Device> devices = new ArrayList<>();
     private FloatingActionButton editButton, addButton, OKButton;
 
-    //ListView deviceList;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -51,26 +47,9 @@ public class MainActivity extends AppCompatActivity {
 
         setInitialData();
 
-        //deviceList = findViewById(R.id.deviceList);
-        //DeviceAdapter deviceAdapter = new DeviceAdapter(this, R.layout.list_element_device, devices);
-        //deviceList.setAdapter(deviceAdapter);
-        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.deviceListR);
+        RecyclerView recyclerView = findViewById(R.id.deviceListR);
         DeviceAdapterR adapterR = new DeviceAdapterR(this, devices);
         recyclerView.setAdapter(adapterR);
-
-        AdapterView.OnItemClickListener itemListener = new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
-
-                // получаем выбранный пункт
-                Device selectedDevice = (Device) parent.getItemAtPosition(position);
-                Toast.makeText(getApplicationContext(), "Был выбран пункт " + selectedDevice.getName(),
-                        Toast.LENGTH_SHORT).show();
-                Intent intent = new Intent(getApplicationContext(), DeviceMenuActivity.class);
-                startActivity(intent);
-            }
-        };
-        //deviceList.setOnItemClickListener(itemListener);
     }
 
     private void editDevices() {
@@ -83,6 +62,10 @@ public class MainActivity extends AppCompatActivity {
         editButton.setVisibility(View.VISIBLE);
         addButton.setVisibility(View.GONE);
         OKButton.setVisibility(View.GONE);
+    }
+
+    public List<Device> getDevices() {
+        return devices;
     }
 
     private void setInitialData(){

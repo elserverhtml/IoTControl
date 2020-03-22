@@ -1,5 +1,6 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/list_device"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
@@ -44,6 +45,4 @@
         android:backgroundTint="#0000"
         android:contentDescription="@string/button_lamp"
         app:srcCompat="@drawable/ic_device_off" />
-
-
 </LinearLayout>
