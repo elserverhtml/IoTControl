@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/list_timer"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:padding="14dp">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_weight="1">
+        <TextView
+            android:id="@+id/timerTime"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:textSize="36sp"/>
+        <TextView
+            android:id="@+id/timerMode"
+            android:layout_width="wrap_content"
+            android:layout_height="22dp"
+            android:text="@string/timerSingly"
+            android:textSize="14sp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginEnd="25dp"
+        android:layout_weight="0">
+        <ImageView
+            android:id="@+id/fromStatus"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            app:srcCompat="@drawable/ic_device_off"
+            android:contentDescription="@string/fromStatus" />
+        <ImageView
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            app:srcCompat="@drawable/ic_arrow"
+            android:contentDescription="@string/direction" />
+        <ImageView
+            android:id="@+id/toStatus"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            app:srcCompat="@drawable/ic_device_on"
+            android:contentDescription="@string/toStatus" />
+    </LinearLayout>
+
+    <androidx.appcompat.widget.SwitchCompat
+        android:id="@+id/timerController"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="0"
+        android:theme="@style/TimerSwitch"/>
+
+</LinearLayout>

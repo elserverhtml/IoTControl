@@ -2,13 +2,20 @@ package com.example.lampcontrol;
 
 import android.content.Intent;
 
+import java.util.ArrayList;
+import java.util.List;
+
 abstract class Device {
-    final static  int IMAGE_BT_CONNECTED = R.drawable.ic_bluetooth_connected;
-    final static  int IMAGE_BT_DISCONNECTED = R.drawable.ic_bluetooth_disconnected;
-    final static  int IMAGE_WF_CONNECTED = R.drawable.ic_wifi_connected;
-    final static  int IMAGE_WF_DISCONNECTED = R.drawable.ic_wifi_disconnected;
+    private final static  int IMAGE_BT_CONNECTED = R.drawable.ic_bluetooth_connected;
+    private final static  int IMAGE_BT_DISCONNECTED = R.drawable.ic_bluetooth_disconnected;
+    private final static  int IMAGE_WF_CONNECTED = R.drawable.ic_wifi_connected;
+    private final static  int IMAGE_WF_DISCONNECTED = R.drawable.ic_wifi_disconnected;
     final static  int IMAGE_DEVICE_ON = R.drawable.ic_device_on;
     final static  int IMAGE_DEVICE_OFF = R.drawable.ic_device_off;
+
+    final static int DEVICE_STATUS_WAITING = 0;
+    final static int DEVICE_STATUS_ONLINE = 2;
+    final static int DEVICE_STATUS_OFFLINE = 1;
 
     private int image_connected;
     private int image_disconnected;
@@ -17,7 +24,8 @@ abstract class Device {
 
     private String name;
     private boolean deviceIsOn = false;
-    private boolean deviceIsConnected = false;
+    private int connectionStatus = DEVICE_STATUS_WAITING;
+    private List<Timer> timers = new ArrayList<>();
 
     private boolean typeConnectionIsBluetooth;
     private String BT_MAC = "";
@@ -74,18 +82,15 @@ abstract class Device {
         this.deviceIsOn = isOn;
     }
 
-    boolean isConnected() {
-        return deviceIsConnected;
+    int getConnectionStatus() {
+        return connectionStatus;
     }
-    void setDeviceConnected(boolean isOnline) {
-        this.deviceIsConnected = isOnline;
+    void setConnectionStatus(int connectionStatus) {
+        this.connectionStatus = connectionStatus;
     }
 
     boolean isTypeConnectionBluetooth() {
         return typeConnectionIsBluetooth;
-    }
-    void setTypeConnection(boolean typeConnectionIsBluetooth) {
-        this.typeConnectionIsBluetooth = typeConnectionIsBluetooth;
     }
 
     String getBT_MAC() {
@@ -121,5 +126,18 @@ abstract class Device {
     }
     void setImageDeviceOff(int image_deviceOff) {
         this.image_deviceOff = image_deviceOff;
+    }
+
+    List<Timer> getAllTimers() {
+        return timers;
+    }
+    void addTimer(Timer timer) {
+        timers.add(timer);
+    }
+    void removeTimer(Timer timer) {
+        timers.remove(timer);
+    }
+    void removeTimer(int id) {
+        timers.remove(id);
     }
 }

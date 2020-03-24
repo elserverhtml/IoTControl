@@ -18,7 +18,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".DeviceMenuActivity" />
+        <activity android:name=".DeviceMenuActivity"
+            android:launchMode="singleTask"/>
         <activity android:name=".AddDeviceActivity"/>
     </application>
 

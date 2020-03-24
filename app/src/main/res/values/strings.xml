@@ -1,16 +1,38 @@
 <resources>
     <string name="app_name">IoT Control</string>
-    <string name="online">Device online</string>
-    <string name="offline">Device offline</string>
-    <string name="button_lamp">On/Off button device</string>
-    <string name="device_status">Device status</string>
-    <string name="connection_type">Выберите тип подключения:</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+<!--list device strings -->
+    <string name="connection_status_device_online">Соединение установлено</string>
+    <string name="connection_status_device_offline">Устройство недоступно</string>
+    <string name="connection_status_device_waiting_for_connection_status_check">Ожидание проверки подключения</string>
+
+    <string name="button_control">Кнопка изменения состояния устройства</string>
+    <string name="device_status">Статус подключения</string>
+
+<!--add device strings-->
+    <string name="connection_type">Выберите тип подключения:</string>
     <string name="device_name">Введите название устройства</string>
     <string name="device_type">Выберите тип устройства:</string>
     <string name="bound_devices">Выберите сопряжённое устройство:</string>
     <string name="cancel">Отмена</string>
     <string name="create">Создать</string>
+
+<!-- BT add fragment strings -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+<!-- device menu strings -->
+    <string name="out_of_sight">Не удалось подключится к устройству</string>
+    <string name="synchronize_time">Синхронизировать время</string>
+
+<!-- list timer strings-->
+    <string name="fromStatus">Начальное состояние</string>
+    <string name="direction">Направление перехода</string>
+    <string name="toStatus">Конечное состояние</string>
+    <string name="deviceTime">Время на устройстве:</string>
+    <string name="timerSingly">Однократно</string>
+    <string name="timerEveryday">Каждый день</string>
+    <string name="timerWeekday">По будням</string>
+    <string name="timerWeekend">По выходным</string>
+    <string name="edit_device">Редактировать информацию об устройстве</string>
+    <string name="delete_device">Удалить устройство</string>
 </resources>

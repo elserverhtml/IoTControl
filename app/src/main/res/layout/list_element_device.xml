@@ -4,8 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
-    android:padding="14dp"
-    android:layout_marginBottom="1dp">
+    android:padding="14dp">
 
     <LinearLayout
         android:layout_width="0dp"
@@ -24,9 +23,20 @@
             android:id="@+id/textConnect"
             android:layout_width="wrap_content"
             android:layout_height="22dp"
-            android:text="@string/app_name"
+            android:text="@string/connection_status_device_waiting_for_connection_status_check"
             android:textSize="14sp" />
     </LinearLayout>
+
+    <ImageView
+        android:id="@+id/deviceStatus"
+        android:layout_width="48dp"
+        android:layout_height="match_parent"
+        android:layout_weight="0"
+        android:padding="11dp"
+        android:backgroundTint="#0000"
+        android:contentDescription="@string/button_control"
+        app:srcCompat="@drawable/ic_device_off"
+        android:visibility="gone"/>
 
     <ImageView
         android:id="@+id/imageConnect"
@@ -38,11 +48,23 @@
         android:contentDescription="@string/device_status" />
 
     <ImageView
-        android:id="@+id/deviceStatus"
+        android:id="@+id/imageEdit"
         android:layout_width="48dp"
-        android:layout_height="match_parent"
+        android:layout_height="48dp"
         android:layout_weight="0"
-        android:backgroundTint="#0000"
-        android:contentDescription="@string/button_lamp"
-        app:srcCompat="@drawable/ic_device_off" />
+        android:padding="11dp"
+        android:tint="@color/lightOrange"
+        app:srcCompat="@drawable/ic_edit"
+        android:contentDescription="@string/edit_device"
+        android:visibility="gone"/>
+
+    <ImageView
+        android:id="@+id/imageDelete"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_weight="0"
+        android:padding="11dp"
+        app:srcCompat="@drawable/ic_delete"
+        android:contentDescription="@string/delete_device"
+        android:visibility="gone"/>
 </LinearLayout>
