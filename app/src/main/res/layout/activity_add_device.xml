@@ -7,13 +7,17 @@
     tools:context=".AddDeviceActivity">
 
     <TextView
-        android:id="@+id/textView"
+        android:id="@+id/activityName"
         android:layout_width="match_parent"
-        android:layout_height="60dp"
+        android:layout_height="70dp"
         android:layout_marginBottom="1dp"
-        android:gravity="center"
-        android:text="@string/connection_type"
-        android:textSize="20sp"
+        android:background="@color/colorPrimary"
+        android:gravity="center_vertical"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:text="@string/add_activity_name"
+        android:textSize="24sp"
+        android:textColor="@android:color/black"
         app:layout_constraintBottom_toTopOf="@+id/linearLayout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -23,39 +27,43 @@
         android:id="@+id/linearLayout"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
         android:backgroundTint="#8D8D8D"
+        android:orientation="horizontal"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView">
+        app:layout_constraintTop_toBottomOf="@+id/activityName">
 
         <ImageButton
-            android:id="@+id/imageButton2"
+            android:id="@+id/imageBluetoothDevice"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="1dp"
             android:layout_weight="1"
-            android:backgroundTint="#FFFFFF"
+            android:backgroundTint="#0000"
+            android:tint="@color/lightOrange"
+            android:contentDescription="@string/type_connection_bluetooth"
             app:srcCompat="@drawable/ic_bluetooth" />
 
         <ImageButton
-            android:id="@+id/imageButton3"
+            android:id="@+id/imageWifiDevice"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="1dp"
             android:layout_weight="1"
-            android:backgroundTint="#FFFFFF"
+            android:backgroundTint="#0000"
+            android:contentDescription="@string/type_connection_wifi"
             app:srcCompat="@drawable/ic_wifi" />
     </LinearLayout>
 
     <fragment
         android:id="@+id/fragment"
-        android:name="com.example.lampcontrol.BTFragment"
+        android:name="com.example.IoTControl.BTFragment"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/linearLayout" />
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout"
+        tools:layout="@layout/fragment_bluetooth" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

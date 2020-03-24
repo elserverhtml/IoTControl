@@ -8,12 +8,16 @@
 
     <string name="button_control">Кнопка изменения состояния устройства</string>
     <string name="device_status">Статус подключения</string>
+    <string name="edit_device">Редактировать информацию об устройстве</string>
+    <string name="delete_device">Удалить устройство</string>
 
 <!--add device strings-->
-    <string name="connection_type">Выберите тип подключения:</string>
-    <string name="device_name">Введите название устройства</string>
-    <string name="device_type">Выберите тип устройства:</string>
-    <string name="bound_devices">Выберите сопряжённое устройство:</string>
+    <string name="add_activity_name">Добавление нового устройства</string>
+    <string name="type_connection_wifi">Тип подключени: wifi</string>
+    <string name="type_connection_bluetooth">Тип подключени: bluetooth</string>
+    <string name="device_name">Название устройства</string>
+    <string name="device_type">Тип устройства:</string>
+    <string name="bound_devices">Устройство:</string>
     <string name="cancel">Отмена</string>
     <string name="create">Создать</string>
 
@@ -25,14 +29,14 @@
     <string name="synchronize_time">Синхронизировать время</string>
 
 <!-- list timer strings-->
-    <string name="fromStatus">Начальное состояние</string>
+    <string name="from_status">Начальное состояние</string>
     <string name="direction">Направление перехода</string>
-    <string name="toStatus">Конечное состояние</string>
-    <string name="deviceTime">Время на устройстве:</string>
-    <string name="timerSingly">Однократно</string>
-    <string name="timerEveryday">Каждый день</string>
-    <string name="timerWeekday">По будням</string>
-    <string name="timerWeekend">По выходным</string>
-    <string name="edit_device">Редактировать информацию об устройстве</string>
-    <string name="delete_device">Удалить устройство</string>
+    <string name="to_status">Конечное состояние</string>
+    <string name="device_time">Время на устройстве:</string>
+    <string name="timer_singly">Однократно</string>
+    <string name="timer_everyday">Каждый день</string>
+    <string name="timer_weekday">По будням</string>
+    <string name="timer_weekend">По выходным</string>
+
+<!-- New -->
 </resources>

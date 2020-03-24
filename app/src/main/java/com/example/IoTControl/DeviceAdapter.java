@@ -1,4 +1,4 @@
-package com.example.lampcontrol;
+package com.example.IoTControl;
 
 import android.content.Context;
 import android.content.Intent;
@@ -17,19 +17,17 @@ import java.util.List;
 public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.ViewHolder> {
     private LayoutInflater inflater;
     private List<Device> devices;
-    private GetContextFunction getContextFunction;
 
-    DeviceAdapter(Context context, List<Device> devices, GetContextFunction getContextFunction) {
+    DeviceAdapter(Context context, List<Device> devices) {
         this.inflater = LayoutInflater.from(context);
         this.devices = devices;
-        this.getContextFunction = getContextFunction;
     }
 
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = inflater.inflate(R.layout.list_element_device, parent, false);
-        return new ViewHolder(view, getContextFunction);
+        return new ViewHolder(view);
     }
 
     @Override
@@ -81,8 +79,7 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.ViewHolder
         final TextView nameView, textConnect;
         final LinearLayout listDevice;
 
-        GetContextFunction getContextFunction;
-        ViewHolder(@NonNull View view, GetContextFunction getContextFunction){
+        ViewHolder(@NonNull View view){
             super(view);
             listDevice = view.findViewById(R.id.list_device);
             nameView = view.findViewById(R.id.nameView);
@@ -91,7 +88,6 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.ViewHolder
             deviceStatus = view.findViewById(R.id.deviceStatus);
             imageEdit = view.findViewById(R.id.imageEdit);
             imageDelete = view.findViewById(R.id.imageDelete);
-            this.getContextFunction = getContextFunction;
 
             listDevice.setOnClickListener(this);
             deviceStatus.setOnClickListener(this);
@@ -114,7 +110,7 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.ViewHolder
                         //TODO: editClick();
                         break;
                     case R.id.imageDelete:
-                        //TODO: deleteClick();
+                        deleteClick(position);
                         break;
                 }
             }
@@ -131,7 +127,12 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.ViewHolder
         private void statusClick(int position) {
             Device selectedDevice = MainActivity.devices.get(position);
             selectedDevice.setDeviceIsOn(!selectedDevice.isOn());
-            getContextFunction.update();
+            MainActivity.adapterR.notifyItemChanged(position);
+        }
+
+        private void deleteClick(int position) {
+            MainActivity.devices.remove(position);
+            MainActivity.adapterR.notifyItemRemoved(position);
         }
     }
 }

@@ -1,6 +1,4 @@
-package com.example.lampcontrol;
-
-import android.content.Intent;
+package com.example.IoTControl;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +20,7 @@ abstract class Device {
     private int image_deviceOn ;
     private int image_deviceOff;
 
+    private int deviceId;
     private String name;
     private boolean deviceIsOn = false;
     private int connectionStatus = DEVICE_STATUS_WAITING;
@@ -64,9 +63,14 @@ abstract class Device {
     }
 
     abstract void isConnectorOn();
-    abstract void findDevices();
     abstract void connectDevice();
-    abstract Intent deviceMenu(Intent intent);
+
+    public int getDeviceId() {
+        return deviceId;
+    }
+    public void setDeviceId(int deviceId) {
+        this.deviceId = deviceId;
+    }
 
     void setName(String name){
         this.name = name;

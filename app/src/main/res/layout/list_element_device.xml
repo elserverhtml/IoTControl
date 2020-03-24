@@ -67,4 +67,13 @@
         app:srcCompat="@drawable/ic_delete"
         android:contentDescription="@string/delete_device"
         android:visibility="gone"/>
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        style="?android:attr/progressBarStyle"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_weight="0"
+        android:padding="8dp"
+        android:visibility="gone"/>
 </LinearLayout>

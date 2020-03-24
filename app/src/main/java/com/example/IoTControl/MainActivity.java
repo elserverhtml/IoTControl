@@ -1,4 +1,4 @@
-package com.example.lampcontrol;
+package com.example.IoTControl;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -15,10 +15,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
-    public static List<Device> devices = new ArrayList<>();
+    static List<Device> devices = new ArrayList<>();
+    static DeviceAdapter adapterR;
+
 
     private FloatingActionButton addButton, editButton, syncButton, multifunctionButton;
-    private DeviceAdapter adapterR;
 
     private Animation animHideAdd, animHideEdit, animHideSync, animHideMultifunction,
             animShowAdd, animShowEdit, animShowSync, animShowMultifunction;
@@ -37,13 +38,8 @@ public class MainActivity extends AppCompatActivity {
         devices.get(1).addTimer(new Timer(2, 5, 16, 30, false, true));
         devices.get(1).setConnectionStatus(Device.DEVICE_STATUS_ONLINE);
         devices.get(2).setConnectionStatus(Device.DEVICE_STATUS_ONLINE);
-        RecyclerView  recyclerView = findViewById(R.id.deviceListR);
-        adapterR = new DeviceAdapter(this, devices, new GetContextFunction() {
-            @Override
-            public void update() {
-                adapterR.notifyDataSetChanged();
-            }
-        });
+        RecyclerView recyclerView = findViewById(R.id.deviceListR);
+        adapterR = new DeviceAdapter(this, devices);
         recyclerView.setAdapter(adapterR);
     }
 
@@ -62,7 +58,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        updateList();
+        adapterR.notifyDataSetChanged();
     }
 
     private void openMenu() {
@@ -77,14 +73,16 @@ public class MainActivity extends AppCompatActivity {
         syncButton.startAnimation(animShowSync);
         multifunctionButton.startAnimation(animShowMultifunction);
         multifunctionButton.setImageResource(R.drawable.ic_close);
+        devices.get(0).setConnectionStatus(Device.DEVICE_STATUS_ONLINE);
+        adapterR.notifyItemChanged(0);
     }
 
     private void closeMenu(boolean isFast, boolean isChangeMultiB) {
         isMenuOpen = false;
         if(isFast) {
-            animHideAdd.setDuration(0);
-            animHideEdit.setDuration(0);
-            animHideSync.setDuration(0);
+            animHideAdd.setDuration(30);
+            animHideEdit.setDuration(30);
+            animHideSync.setDuration(30);
         }
         addButton.startAnimation(animHideAdd);
         editButton.startAnimation(animHideEdit);
@@ -93,6 +91,8 @@ public class MainActivity extends AppCompatActivity {
             multifunctionButton.startAnimation(animHideMultifunction);
             multifunctionButton.setImageResource(R.drawable.ic_menu);
         }
+        devices.get(0).setConnectionStatus(Device.DEVICE_STATUS_OFFLINE);
+        adapterR.notifyItemChanged(0);
     }
 
     private void editDevices() {
@@ -100,22 +100,18 @@ public class MainActivity extends AppCompatActivity {
         multifunctionButton.startAnimation(animShowMultifunction);
         multifunctionButton.setImageResource(R.drawable.ic_ok);
         isEditMode = true;
-        updateList();
+        adapterR.notifyItemRangeChanged(0, devices.size());
     }
 
     private void stopEditDevices() {
         multifunctionButton.startAnimation(animHideMultifunction);
         multifunctionButton.setImageResource(R.drawable.ic_menu);
         isEditMode = false;
-        updateList();
+        adapterR.notifyItemRangeChanged(0, devices.size());
     }
 
     public boolean isEditMode() {
         return isEditMode;
-    }
-
-    public void updateList () {
-        adapterR.notifyDataSetChanged();
     }
 
     private void prepareFABs() {

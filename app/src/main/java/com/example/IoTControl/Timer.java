@@ -1,4 +1,4 @@
-package com.example.lampcontrol;
+package com.example.IoTControl;
 
 class Timer {
     private final static int MODE_EVERYDAY = 127;
@@ -25,13 +25,13 @@ class Timer {
     static int getConstStringDays(int days) {
         switch (days) {
             case Timer.MODE_EVERYDAY:
-                return R.string.timerEveryday;
+                return R.string.timer_everyday;
             case Timer.MODE_WEEKDAY:
-                return R.string.timerWeekday;
+                return R.string.timer_weekday;
             case Timer.MODE_WEEKEND:
-                return R.string.timerWeekend;
+                return R.string.timer_weekend;
             case Timer.MODE_SINGLY:
-                return R.string.timerSingly;
+                return R.string.timer_singly;
             default:
                 return -1;
         }

@@ -22,7 +22,7 @@
             android:id="@+id/timerMode"
             android:layout_width="wrap_content"
             android:layout_height="22dp"
-            android:text="@string/timerSingly"
+            android:text="@string/timer_singly"
             android:textSize="14sp" />
     </LinearLayout>
 
@@ -37,7 +37,7 @@
             android:layout_width="30dp"
             android:layout_height="30dp"
             app:srcCompat="@drawable/ic_device_off"
-            android:contentDescription="@string/fromStatus" />
+            android:contentDescription="@string/from_status" />
         <ImageView
             android:layout_width="30dp"
             android:layout_height="30dp"
@@ -48,7 +48,7 @@
             android:layout_width="30dp"
             android:layout_height="30dp"
             app:srcCompat="@drawable/ic_device_on"
-            android:contentDescription="@string/toStatus" />
+            android:contentDescription="@string/to_status" />
     </LinearLayout>
 
     <androidx.appcompat.widget.SwitchCompat

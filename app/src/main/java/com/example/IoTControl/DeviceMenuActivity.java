@@ -1,4 +1,4 @@
-package com.example.lampcontrol;
+package com.example.IoTControl;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
@@ -46,13 +46,8 @@ public class DeviceMenuActivity extends AppCompatActivity {
             for(int i = 0; i < MainActivity.devices.get(position).getAllTimers().size(); i++)
                 timers.add(MainActivity.devices.get(position).getAllTimers().get(i));
             RecyclerView recyclerView = findViewById(R.id.timerListR);
-            adapterR = new TimerAdapter(this, MainActivity.devices.get(position).getAllTimers(), new GetContextFunction() {
-                @Override
-                public void update() {
-                    adapterR.notifyDataSetChanged();
-                }
-            });
-                    recyclerView.setAdapter(adapterR);
+            adapterR = new TimerAdapter(this, MainActivity.devices.get(position).getAllTimers());
+            recyclerView.setAdapter(adapterR);
 
             findViewById(R.id.linearLayout2).setVisibility(View.VISIBLE);
             findViewById(R.id.outOfSightView).setVisibility(View.GONE);

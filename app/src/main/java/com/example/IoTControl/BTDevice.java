@@ -1,6 +1,4 @@
-package com.example.lampcontrol;
-
-import android.content.Intent;
+package com.example.IoTControl;
 
 import java.util.UUID;
 
@@ -21,18 +19,12 @@ class BTDevice extends Device{
 
     }
 
-    @Override
-    void findDevices() {
+    static void findDevices() {
 
     }
 
     @Override
     void connectDevice() {
 
-    }
-
-    @Override
-    Intent deviceMenu(Intent intent) {
-        return intent;
     }
 }

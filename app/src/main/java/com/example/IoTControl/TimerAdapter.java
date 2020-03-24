@@ -1,4 +1,4 @@
-package com.example.lampcontrol;
+package com.example.IoTControl;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -17,19 +17,17 @@ import java.util.Locale;
 public class TimerAdapter extends RecyclerView.Adapter<TimerAdapter.ViewHolder> {
     private LayoutInflater inflater;
     private List<Timer> timers;
-    private GetContextFunction getContextFunction;
 
-    TimerAdapter(Context context, List<Timer> timers, GetContextFunction getContextFunction) {
+    TimerAdapter(Context context, List<Timer> timers) {
         this.inflater = LayoutInflater.from(context);
         this.timers = timers;
-        this.getContextFunction = getContextFunction;
     }
 
     @NonNull
     @Override
     public TimerAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = inflater.inflate(R.layout.list_element_timer, parent, false);
-        return new TimerAdapter.ViewHolder(view, getContextFunction);
+        return new TimerAdapter.ViewHolder(view);
     }
 
     @Override
@@ -62,15 +60,13 @@ public class TimerAdapter extends RecyclerView.Adapter<TimerAdapter.ViewHolder> 
         final SwitchCompat timerController;
         //final LinearLayout listDevice;
 
-        GetContextFunction getContextFunction;
-        ViewHolder(@NonNull View view, GetContextFunction getContextFunction){
+        ViewHolder(@NonNull View view){
             super(view);
             timerTime = view.findViewById(R.id.timerTime);
             timerMode = view.findViewById(R.id.timerMode);
             fromStatus = view.findViewById(R.id.fromStatus);
             toStatus = view.findViewById(R.id.toStatus);
             timerController = view.findViewById(R.id.timerController);
-            this.getContextFunction = getContextFunction;
 
             //listDevice.setOnClickListener(this);
             //deviceStatus.setOnClickListener(this);
@@ -95,7 +91,6 @@ public class TimerAdapter extends RecyclerView.Adapter<TimerAdapter.ViewHolder> 
         private void switchClick(int position) {
             Timer selectedTimer = DeviceMenuActivity.timers.get(position);
             selectedTimer.setEnable(timerController.isChecked());
-            getContextFunction.update();
         }
     }
 }

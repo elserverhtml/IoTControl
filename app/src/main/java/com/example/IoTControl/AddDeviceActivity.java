@@ -1,4 +1,4 @@
-package com.example.lampcontrol;
+package com.example.IoTControl;
 
 import androidx.appcompat.app.AppCompatActivity;
 
