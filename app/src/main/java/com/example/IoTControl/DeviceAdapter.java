@@ -91,6 +91,7 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.ViewHolder
 
             listDevice.setOnClickListener(this);
             deviceStatus.setOnClickListener(this);
+            imageConnect.setOnClickListener(this);
             imageEdit.setOnClickListener(this);
             imageDelete.setOnClickListener(this);
         }
@@ -104,7 +105,10 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.ViewHolder
                         deviceClick(v, position);
                         break;
                     case R.id.deviceStatus:
-                        statusClick(position);
+                        statusClick(v, position);
+                        break;
+                    case R.id.imageConnect:
+                        connectClick(v, position);
                         break;
                     case R.id.imageEdit:
                         //TODO: editClick();
@@ -118,16 +122,21 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.ViewHolder
 
         private void deviceClick(View v, int position) {
             if(!((MainActivity) v.getContext()).isEditMode()) {
+                ((MainActivity) v.getContext()).closeMenu(true, true);
                 Intent intent = new Intent(v.getContext(), DeviceMenuActivity.class);
                 intent.putExtra(Device.class.getSimpleName(), position);
                 v.getContext().startActivity(intent);
             }
         }
 
-        private void statusClick(int position) {
+        private void statusClick(View v, int position) {
             Device selectedDevice = MainActivity.devices.get(position);
-            selectedDevice.setDeviceIsOn(!selectedDevice.isOn());
-            MainActivity.adapterR.notifyItemChanged(position);
+            selectedDevice.controlDeviceFromList(v.getContext(), position, !selectedDevice.isOn());
+        }
+
+        private void connectClick(View v, int position) {
+            if(MainActivity.devices.get(position).getConnectionStatus() != Device.DEVICE_STATUS_ONLINE)
+                MainActivity.devices.get(position).isCanConnect(v.getContext(), position);
         }
 
         private void deleteClick(int position) {

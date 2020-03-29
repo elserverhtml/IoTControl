@@ -1,5 +1,7 @@
 package com.example.IoTControl;
 
+import android.content.Context;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -62,8 +64,9 @@ abstract class Device {
         this.image_deviceOff = image_deviceOff;
     }
 
-    abstract void isConnectorOn();
-    abstract void connectDevice();
+    abstract void isCanConnect(Context context, int pos);
+    abstract void controlDeviceFromList(Context context, int pos, boolean isOn);
+    abstract void connectToDevice(Context context, int pos);
 
     public int getDeviceId() {
         return deviceId;

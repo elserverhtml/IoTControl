@@ -28,8 +28,15 @@ public class DeviceMenuActivity extends AppCompatActivity {
         Bundle arguments = getIntent().getExtras();
         if(arguments != null) {
             position = arguments.getInt(Device.class.getSimpleName());
+            MainActivity.devices.get(position).connectToDevice(this, position);
             workWithActivity();
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        MainActivity.daemon.activityClosed();
     }
 
     void workWithActivity() {
@@ -43,8 +50,7 @@ public class DeviceMenuActivity extends AppCompatActivity {
         });
 
         if(MainActivity.devices.get(position).getConnectionStatus() == Device.DEVICE_STATUS_ONLINE) {
-            for(int i = 0; i < MainActivity.devices.get(position).getAllTimers().size(); i++)
-                timers.add(MainActivity.devices.get(position).getAllTimers().get(i));
+            timers.addAll(MainActivity.devices.get(position).getAllTimers());
             RecyclerView recyclerView = findViewById(R.id.timerListR);
             adapterR = new TimerAdapter(this, MainActivity.devices.get(position).getAllTimers());
             recyclerView.setAdapter(adapterR);

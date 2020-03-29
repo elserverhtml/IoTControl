@@ -2,6 +2,7 @@ package com.example.IoTControl;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -17,7 +18,8 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
     static List<Device> devices = new ArrayList<>();
     static DeviceAdapter adapterR;
-
+    static DataForDaemon data = new DataForDaemon();
+    static BluetoothThreadDaemon daemon;
 
     private FloatingActionButton addButton, editButton, syncButton, multifunctionButton;
 
@@ -41,12 +43,15 @@ public class MainActivity extends AppCompatActivity {
         RecyclerView recyclerView = findViewById(R.id.deviceListR);
         adapterR = new DeviceAdapter(this, devices);
         recyclerView.setAdapter(adapterR);
+
+        daemon = new BluetoothThreadDaemon(this);
+        daemon.start();
+        Log.d("Main", "start: " + daemon.isAlive());
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-
         animHideAdd.setDuration(0);
         animHideEdit.setDuration(0);
         animHideSync.setDuration(0);
@@ -58,10 +63,11 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        adapterR.notifyDataSetChanged();
+        adapterR.notifyItemRangeChanged(0, devices.size());
     }
 
-    private void openMenu() {
+    public void openMenu() {
+        if(isMenuOpen) return;
         if(animHideSync.getDuration() == 0) {
             animHideAdd.setDuration(200);
             animHideEdit.setDuration(200);
@@ -73,11 +79,10 @@ public class MainActivity extends AppCompatActivity {
         syncButton.startAnimation(animShowSync);
         multifunctionButton.startAnimation(animShowMultifunction);
         multifunctionButton.setImageResource(R.drawable.ic_close);
-        devices.get(0).setConnectionStatus(Device.DEVICE_STATUS_ONLINE);
-        adapterR.notifyItemChanged(0);
     }
 
-    private void closeMenu(boolean isFast, boolean isChangeMultiB) {
+    public void closeMenu(boolean isFast, boolean isChangeMultiB) {
+        if(!isMenuOpen) return;
         isMenuOpen = false;
         if(isFast) {
             animHideAdd.setDuration(30);
@@ -184,7 +189,6 @@ public class MainActivity extends AppCompatActivity {
         syncButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(isMenuOpen) stopEditDevices();
             }
         });
         multifunctionButton.setOnClickListener(new View.OnClickListener() {
@@ -198,25 +202,25 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setInitialData(){
-        devices.add(new BTDevice("Комната 1", true));
-        devices.add(new BTDevice("Комната 2", true));
-        devices.add(new BTDevice("Комната 3", true));
-        devices.add(new BTDevice("Комната 4", true));
-        devices.add(new BTDevice("Комната 5", true));
-        devices.add(new BTDevice("Комната 6", true));
-        devices.add(new BTDevice("Комната 7", true));
-        devices.add(new BTDevice("Комната 8", true));
-        devices.add(new BTDevice("Комната 9", true));
-        devices.add(new BTDevice("Комната 10", true));
-        devices.add(new BTDevice("Комната 11", true));
-        devices.add(new BTDevice("Комната 12", true));
-        devices.add(new BTDevice("Комната 13", true));
-        devices.add(new BTDevice("Комната 14", true));
-        devices.add(new BTDevice("Комната 15", true));
-        devices.add(new BTDevice("Комната 16", true));
-        devices.add(new BTDevice("Комната 17", true));
-        devices.add(new BTDevice("Комната 18", true));
-        devices.add(new BTDevice("Комната 19", true));
-        devices.add(new BTDevice("Комната 20", true));
+        devices.add(new BTDevice("Комната 1", true, "1D:1D:1D:1D:1D:1D"));
+        devices.add(new BTDevice("Комната 2", true, "2E:2E:2E:2E:2E:2E"));
+        devices.add(new BTDevice("Комната 3", true, "3C:3C:3C:3C:3C:3C"));
+        devices.add(new BTDevice("Комната 4", true, "4A:4A:4A:4A:4A:4A"));
+        devices.add(new BTDevice("Комната 5", true, "5B:5B:5B:5B:5B:5B"));
+        devices.add(new BTDevice("Комната 6", true, "6F:6F:6F:6F:6F:6F"));
+        devices.add(new BTDevice("Комната 7", true, "7E:7E:7E:7E:7E:7E"));
+        devices.add(new BTDevice("Комната 8", true, "8C:8C:8C:8C:8C:8C"));
+        devices.add(new BTDevice("Комната 9", true, "9A:9A:9A:9A:9A:9A"));
+        devices.add(new BTDevice("Комната 10", true, "10:10:10:10:10:10"));
+        devices.add(new BTDevice("Комната 11", true, "11:11:11:11:11:11"));
+        devices.add(new BTDevice("Комната 12", true, "12:12:12:12:12:12"));
+        devices.add(new BTDevice("Комната 13", true, "13:13:13:13:13:13"));
+        devices.add(new BTDevice("Комната 14", true, "14:14:14:14:14:14"));
+        devices.add(new BTDevice("Комната 15", true, "15:15:15:15:15:15"));
+        devices.add(new BTDevice("Комната 16", true, "16:16:16:16:16:16"));
+        devices.add(new BTDevice("Комната 17", true, "17:17:17:17:17:17"));
+        devices.add(new BTDevice("Комната 18", true, "18:18:18:18:18:18"));
+        devices.add(new BTDevice("Комната 19", true, "19:19:19:19:19:19"));
+        devices.add(new BTDevice("Комната 20", true, "20:20:20:20:20:20"));
     }
 }
