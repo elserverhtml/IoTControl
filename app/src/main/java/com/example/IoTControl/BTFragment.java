@@ -43,7 +43,7 @@ public class BTFragment extends Fragment {
                     Toast.makeText(addDeviceActivity, "Выберите устройство", Toast.LENGTH_LONG).show();
                     return;
                 }
-                Device device = new BTDevice(nameDevice , true, BT_MAC);
+                Device device = new BTDevice(MainActivity.devices.size(), nameDevice , true, BT_MAC);
                 MainActivity.devices.add(device);
                 addDeviceActivity.finish();
             }

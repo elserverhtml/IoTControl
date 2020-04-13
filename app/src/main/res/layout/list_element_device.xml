@@ -39,12 +39,12 @@
         android:visibility="gone"/>
 
     <ImageView
-        android:id="@+id/imageConnect"
+        android:id="@+id/deviceConnect"
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:layout_weight="0"
         android:padding="11dp"
-        app:srcCompat="@drawable/ic_bluetooth_disconnected"
+        app:srcCompat="@drawable/ic_bluetooth_unknown"
         android:contentDescription="@string/device_status" />
 
     <ImageView

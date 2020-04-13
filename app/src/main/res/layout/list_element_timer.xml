@@ -51,6 +51,27 @@
             android:contentDescription="@string/to_status" />
     </LinearLayout>
 
+    <ImageView
+        android:id="@+id/editTimer"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_weight="0"
+        android:padding="9dp"
+        android:tint="@color/lightOrange"
+        app:srcCompat="@drawable/ic_edit"
+        android:contentDescription="@string/editTimer"
+        android:visibility="gone"/>
+
+    <ImageView
+        android:id="@+id/deleteTimer"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_weight="0"
+        android:padding="9dp"
+        app:srcCompat="@drawable/ic_delete"
+        android:contentDescription="@string/delete_timer"
+        android:visibility="gone"/>
+
     <androidx.appcompat.widget.SwitchCompat
         android:id="@+id/timerController"
         android:layout_width="wrap_content"

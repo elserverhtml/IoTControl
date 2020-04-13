@@ -4,29 +4,29 @@ import android.content.Context;
 
 class BTDevice extends Device{
 
-    BTDevice(String name, boolean typeConnectionIsBluetooth, String BT_MAC) {
-        super(name, typeConnectionIsBluetooth);
+    BTDevice(int position, String name, boolean typeConnectionIsBluetooth, String BT_MAC) {
+        super(position, name, typeConnectionIsBluetooth);
         super.setBT_MAC(BT_MAC);
     }
 
-    BTDevice(String name, boolean typeConnectionIsBluetooth, String BT_MAC, int image_deviceOn, int image_deviceOff) {
-        super(name, typeConnectionIsBluetooth, image_deviceOn, image_deviceOff);
+    BTDevice(int position, String name, boolean typeConnectionIsBluetooth, String BT_MAC, int image_deviceOn, int image_deviceOff) {
+        super(position, name, typeConnectionIsBluetooth, image_deviceOn, image_deviceOff);
         super.setBT_MAC(BT_MAC);
     }
 
     @Override
-    void isCanConnect(Context context, int pos) {
+    void isCanConnect(Context context) {
         DataForDaemon.DeviceInfo deviceInfo = new DataForDaemon.DeviceInfo();
-        deviceInfo.position = pos;
+        deviceInfo.position = this.getPosition();
         deviceInfo.parentContext = context;
         deviceInfo.isSet = false;
         MainActivity.data.addDevice(deviceInfo);
     }
 
     @Override
-    void controlDeviceFromList(Context context, int pos, boolean isOn) {
+    void controlDeviceFromList(Context context, boolean isOn) {
         DataForDaemon.DeviceInfo deviceInfo = new DataForDaemon.DeviceInfo();
-        deviceInfo.position = pos;
+        deviceInfo.position = this.getPosition();
         deviceInfo.parentContext = context;
         deviceInfo.isSet = true;
         deviceInfo.isOnLamp = isOn;
@@ -34,103 +34,206 @@ class BTDevice extends Device{
     }
 
     @Override
-    void connectToDevice(Context context, int pos) {
+    void connectToDevice(Context context) {
         DataForDaemon.DeviceInfo deviceInfo = new DataForDaemon.DeviceInfo();
-        deviceInfo.position = pos;
+        deviceInfo.position = this.getPosition();
         deviceInfo.parentContext = context;
-        MainActivity.data.addActivityDevice(deviceInfo);
+        if(MainActivity.devices.get(this.getPosition()).isChecking()) MainActivity.data.isDeviceInDeque(deviceInfo);
+        else MainActivity.daemon.setActivityDevice(deviceInfo);
     }
 
-    public static class SendCommands {
-        static boolean getStatusDevice(String string) {
-            string = "gSD;";
-            return true;
+    static class SendCommands {
+        static String getStatusDevice() {
+            return "gSD;";
         }
 
-        static boolean controlDevice(String string, boolean isOn) {
-            string = "cD-";
+        static String setStatusDevice(boolean isOn) {
+            // sSD-1;
+            String string = "sSD-";
+
             if(isOn) string = string + "1;";
             else string = string + "0;";
-            return false;
+
+            return string;
         }
 
-        static boolean getCurrentTime(String string) {
-            string = "gCT";
-            return true;
+        static String getCurrentTime() {
+            return "gCT;";
         }
 
-        static boolean setCurrentTime(String string, int seconds, int minutes, int hours, int day, int month, int year, int weekday) {
-            string = "sCT-" + seconds + "-"  + minutes + "-" + hours + "-" + day + "-" + month + "-" + year + "-" + weekday + ";";
-            return false;
+        static String setCurrentTime(int seconds, int minutes, int hours, int day, int month, int year, int weekday) {
+            // sCT-60-60-24-31-12-99-7;
+            String string = "sCT-";
+
+            if(seconds < 10) string = string + "0" + seconds;
+            else string = string + seconds;
+            string = string + "-";
+
+            if(minutes < 10) string = string + "0" + minutes;
+            else string = string + minutes;
+            string = string + "-";
+
+            if(hours < 10) string = string + "0" + hours;
+            else string = string + hours;
+            string = string + "-";
+
+            if(day < 10) string = string + "0" + day;
+            else string = string + day;
+            string = string + "-";
+
+            if(month < 10) string = string + "0" + month;
+            else string = string + month;
+            string = string + "-";
+
+            StringBuilder stringBuilder = new StringBuilder();
+            stringBuilder.append(Integer.toString(year));
+            string = string + stringBuilder.substring(2, 4);
+            string = string + "-";
+
+            string = string + weekday + ";";
+
+            return string;
         }
 
-        static boolean getAmountTimers(String string) {
-            string = "gAT;";
-            return true;
+        static String getAmountTimers() {
+            return "gAT;";
         }
 
-        static boolean getTimer(String string, int num) {
-            string = "gT-" + num + ";";
-            return true;
+        static String getTimer(int num) {
+            // gT-20;
+            String string = "gT-";
+
+            if(num < 10) string = string + "0" + num;
+            else string = string + num;
+            string = string + ";";
+
+            return string;
         }
 
-        static boolean addTimer(String string, int hours, int minutes, int weekdays, boolean isOn, boolean isEnable) {
-            string = "aT-" + hours + "-" + minutes + "-" + weekdays + "-";
+        static String addTimer(int hours, int minutes, int weekdays, boolean isOn, boolean isEnable) {
+            // aT-24-60-127-1-1;
+            String string = "aT-";
+
+            if(hours < 10) string = string + "0" + hours;
+            else string = string + hours;
+            string = string + "-";
+
+            if(minutes < 10) string = string + "0" + minutes;
+            else string = string + minutes;
+            string = string + "-";
+
+            if(weekdays < 10) string = string + "00" + weekdays;
+            else if(weekdays < 100) string = string + "0" + weekdays;
+            else string = string + weekdays;
+            string = string + "-";
+
             if(isOn) string = string + "1-";
             else string = string + "0-";
+
             if(isEnable) string = string + "1;";
             else string = string + "0;";
-            return false;
+
+            return string;
         }
 
-        static boolean editTimer(String string, int num, int hours, int minutes, int weekdays, boolean isOn, boolean isEnable) {
-            string = "aT-" + num + "-" + hours + "-" + minutes + "-" + weekdays + "-";
+        static String editTimer(int num, int hours, int minutes, int weekdays, boolean isOn, boolean isEnable) {
+            // eT-20-24-60-127-1-1;
+            String string = "eT-";
+
+            if(num < 10) string = string + "0" + num;
+            else string = string + num;
+            string = string + "-";
+
+            if(hours < 10) string = string + "0" + hours;
+            else string = string + hours;
+            string = string + "-";
+
+            if(minutes < 10) string = string + "0" + minutes;
+            else string = string + minutes;
+            string = string + "-";
+
+            if(weekdays < 10) string = string + "00" + weekdays;
+            else if(weekdays < 100) string = string + "0" + weekdays;
+            else string = string + weekdays;
+            string = string + "-";
+
             if(isOn) string = string + "1-";
             else string = string + "0-";
+
             if(isEnable) string = string + "1;";
             else string = string + "0;";
-            return false;
+
+            return string;
         }
 
-        static boolean controlTimer(String string, int num, boolean isEnable) {
-            string = "cT-" + num + "-";
+        static String manageTimer(int num, boolean isEnable) {
+            //mT-20-1;
+            String string = "mT-";
+
+            if(num < 10) string = string + "0" + num;
+            else string = string + num;
+            string = string + "-";
+
             if(isEnable) string = string + "1;";
             else string = string + "0;";
-            return false;
+
+            return string;
         }
 
-        static boolean deleteTimer(String string, int num) {
-            string = "cT-" + num + ";";
-            return false;
+        static String deleteTimer(int num) {
+            // dT-20;
+            String string = "dT-";
+
+            if(num < 10) string = string + "0" + num;
+            else string = string + num;
+            string = string + ";";
+
+            return string;
         }
     }
 
-    public static class GetData {
-        static boolean statusDevice(String string) {
+    static class GetData {
+        static int statusDevice(String string) {
             StringBuilder sb = new StringBuilder();
             sb.append(string);
             // sD-1;
-            return sb.substring(3,4).equals("1");
+            return Integer.parseInt(sb.substring(3,4));
         }
 
-        static String deviceTime(String s) {
+        static String currentTime(String s) {
             String string;
             StringBuilder sb = new StringBuilder();
             sb.append(s);
-            // dT-60-60-24-31-12-99-7;
+            // cT-60-60-24-31-12-99-7;
             string = sb.substring(9,11) + ":";
             string = string +  sb.substring(6,8) + ":";
             string = string +  sb.substring(3,5) + "  ";
             string = string +  sb.substring(12,14) + ".";
             string = string +  sb.substring(15,17) + ".";
             string = string +  sb.substring(18,20) + "  ";
-            if(sb.substring(21,22).equals("0")) string = string + "ВС";
-            else if(sb.substring(21,22).equals("1")) string = string + "ПН";
-            else if(sb.substring(21,22).equals("2")) string = string + "ВТ";
-            else if(sb.substring(21,22).equals("3")) string = string + "СР";
-            else if(sb.substring(21,22).equals("4")) string = string + "ЧТ";
-            else if(sb.substring(21,22).equals("5")) string = string + "ПТ";
-            else if(sb.substring(21,22).equals("6")) string = string + "СБ";
+            switch (sb.substring(21, 22)) {
+                case "0":
+                    string = string + "ВС";
+                    break;
+                case "1":
+                    string = string + "ПН";
+                    break;
+                case "2":
+                    string = string + "ВТ";
+                    break;
+                case "3":
+                    string = string + "СР";
+                    break;
+                case "4":
+                    string = string + "ЧТ";
+                    break;
+                case "5":
+                    string = string + "ПТ";
+                    break;
+                case "6":
+                    string = string + "СБ";
+                    break;
+            }
             return string;
         }
 
@@ -141,18 +244,18 @@ class BTDevice extends Device{
             return Integer.parseInt(sb.substring(4,6));
         }
 
-        static Timer createTimer(String string) {
+        static Timer timer(String string) {
             int num, hours, minutes, weekdays;
             boolean isOn, isEnable;
             StringBuilder sb = new StringBuilder();
             sb.append(string);
-            // sT-20-24-60-127-1-1;
-            num = Integer.parseInt(sb.substring(3,5));
-            hours = Integer.parseInt(sb.substring(6,8));
-            minutes = Integer.parseInt(sb.substring(9,11));
-            weekdays = Integer.parseInt(sb.substring(12,15));
-            isOn = sb.substring(16,17).equals("1");
-            isEnable = sb.substring(18,19).equals("1");
+            // t-20-24-60-127-1-1;
+            num = Integer.parseInt(sb.substring(2,4));
+            hours = Integer.parseInt(sb.substring(5,7));
+            minutes = Integer.parseInt(sb.substring(8,10));
+            weekdays = Integer.parseInt(sb.substring(11,14));
+            isOn = sb.substring(15,16).equals("1");
+            isEnable = sb.substring(17,18).equals("1");
             return new Timer(num, weekdays, hours, minutes, isOn, isEnable);
         }
     }

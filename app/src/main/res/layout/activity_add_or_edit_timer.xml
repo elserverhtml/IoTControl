@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".AddOrEditTimerActivity">
+
+    <LinearLayout
+        android:id="@+id/linearLayout1"
+        android:layout_width="match_parent"
+        android:layout_height="70dp"
+        android:background="@color/colorPrimary"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingBottom="5dp"
+        android:paddingStart="16dp"
+        android:paddingTop="5dp"
+        android:paddingEnd="10dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/activityName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:textColor="#000000"
+            android:textSize="28sp" />
+    </LinearLayout>
+
+    <TimePicker
+        android:id="@+id/timePicker"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:timePickerMode="spinner"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout1" />
+
+    <LinearLayout
+        android:id="@+id/linearLayout3"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingBottom="10dp"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/timePicker">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_gravity="center">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Режим срабатывания:"/>
+
+            <TextView
+                android:id="@+id/modeEditingText"
+                android:layout_marginStart="5dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=""/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center">
+
+            <ToggleButton
+                android:id="@+id/monButton"
+                android:layout_width="50dp"
+                android:layout_height="wrap_content"
+                android:textOn="ПН"
+                android:textOff="ПН"/>
+
+            <ToggleButton
+                android:id="@+id/tueButton"
+                android:layout_width="50dp"
+                android:layout_height="wrap_content"
+                android:textOn="ВТ"
+                android:textOff="ВТ"/>
+
+            <ToggleButton
+                android:id="@+id/wedButton"
+                android:layout_width="50dp"
+                android:layout_height="wrap_content"
+                android:textOn="СР"
+                android:textOff="СР"/>
+
+            <ToggleButton
+                android:id="@+id/thuButton"
+                android:layout_width="50dp"
+                android:layout_height="wrap_content"
+                android:textOn="ЧТ"
+                android:textOff="ЧТ"/>
+
+            <ToggleButton
+                android:id="@+id/friButton"
+                android:layout_width="50dp"
+                android:layout_height="wrap_content"
+                android:textOn="ПТ"
+                android:textOff="ПТ"/>
+
+            <ToggleButton
+                android:id="@+id/satButton"
+                android:layout_width="50dp"
+                android:layout_height="wrap_content"
+                android:textOn="СБ"
+                android:textOff="СБ"/>
+
+            <ToggleButton
+                android:id="@+id/sunButton"
+                android:layout_width="50dp"
+                android:layout_height="wrap_content"
+                android:textOn="ВС"
+                android:textOff="ВС"/>
+        </LinearLayout>
+    </LinearLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constraintLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout3">
+
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Режим управления"
+            android:textSize="15sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ToggleButton
+            android:id="@+id/manageModeButton"
+            android:layout_width="105dp"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:padding="6dp"
+            android:textAllCaps="false"
+            android:textOff="выключение"
+            android:textOn="включение"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/textView"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="15dp"
+            android:layout_weight="0"
+            android:orientation="horizontal"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <ImageView
+                android:id="@+id/fromStatus"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:contentDescription="@string/from_status"
+                app:srcCompat="@drawable/ic_device_off" />
+
+            <ImageView
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:contentDescription="@string/direction"
+                app:srcCompat="@drawable/ic_arrow" />
+
+            <ImageView
+                android:id="@+id/toStatus"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:contentDescription="@string/to_status"
+                app:srcCompat="@drawable/ic_device_on" />
+        </LinearLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <Button
+        android:id="@+id/cancelDialog"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="15dp"
+        android:layout_marginStart="15dp"
+        android:backgroundTint="@color/lightOrange"
+        android:text="Отмена"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/constraintLayout" />
+
+    <Button
+        android:id="@+id/readyDialog"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:backgroundTint="@color/lightGreen"
+        android:layout_marginTop="15dp"
+        android:layout_marginEnd="15dp"
+        android:text="Готово"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/constraintLayout" />
+</androidx.constraintlayout.widget.ConstraintLayout>

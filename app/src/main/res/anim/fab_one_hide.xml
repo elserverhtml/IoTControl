@@ -5,6 +5,9 @@
     android:shareInterpolator="true">
 
     <translate
-        android:fromXDelta="255%"
-        android:toXDelta="0"/>
+        android:fromXDelta="0"
+        android:toXDelta="140%"/>
+    <alpha
+        android:fromAlpha="1"
+        android:toAlpha="0"/>
 </set>

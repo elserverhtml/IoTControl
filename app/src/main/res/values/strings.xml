@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">IoT Control</string>
 
-<!--list device strings -->
+    <!--list device strings -->
     <string name="connection_status_device_online">Соединение установлено</string>
     <string name="connection_status_device_offline">Устройство недоступно</string>
     <string name="connection_status_device_waiting_for_connection_status_check">Ожидание проверки подключения</string>
@@ -11,24 +11,30 @@
     <string name="edit_device">Редактировать информацию об устройстве</string>
     <string name="delete_device">Удалить устройство</string>
 
-<!--add device strings-->
+    <!--add device strings-->
     <string name="add_activity_name">Добавление нового устройства</string>
     <string name="type_connection_wifi">Тип подключени: wifi</string>
     <string name="type_connection_bluetooth">Тип подключени: bluetooth</string>
+
+    <!-- BT add fragment strings -->
     <string name="device_name">Название устройства</string>
     <string name="device_type">Тип устройства:</string>
     <string name="bound_devices">Устройство:</string>
     <string name="cancel">Отмена</string>
     <string name="create">Создать</string>
 
-<!-- BT add fragment strings -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <!-- WF add fragment strings -->
+    <string name="clientId">Идентификатор клиента</string>
+    <string name="hostURL">Имя хоста</string>
+    <string name="publicTop">Топик</string>
+    <string name="login">Имя пользователя</string>
+    <string name="password">Пароль</string>
 
-<!-- device menu strings -->
+    <!-- device menu strings -->
     <string name="out_of_sight">Не удалось подключится к устройству</string>
     <string name="synchronize_time">Синхронизировать время</string>
 
-<!-- list timer strings-->
+    <!-- list timer strings-->
     <string name="from_status">Начальное состояние</string>
     <string name="direction">Направление перехода</string>
     <string name="to_status">Конечное состояние</string>
@@ -37,6 +43,10 @@
     <string name="timer_everyday">Каждый день</string>
     <string name="timer_weekday">По будням</string>
     <string name="timer_weekend">По выходным</string>
+    <string name="createNewTimer">Создать новый таймер</string>
+    <string name="editTimers">Редактировать таймеры</string>
+    <string name="editTimer">Изменить таймер</string>
+    <string name="delete_timer">Удалить таймер</string>
 
-<!-- New -->
+    <!-- New -->
 </resources>

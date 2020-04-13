@@ -6,6 +6,9 @@ import android.bluetooth.BluetoothSocket;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.util.Log;
+import android.view.View;
+import android.widget.Switch;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.IOException;
@@ -17,26 +20,40 @@ import java.util.Set;
 import java.util.UUID;
 
 class BluetoothThreadDaemon extends Thread {
-    final static private String idForUUID = "00001101-0000-1000-8000-00805F9B34FB";
-    private static BluetoothAdapter bluetoothAdapter = null; // TODO
+    private boolean isSleeping = false;
 
-    private static ArrayList<DataForDaemon.DeviceInfo> devices = new ArrayList<>();
+    final static private String idForUUID = "00001101-0000-1000-8000-00805F9B34FB";
+    private static BluetoothAdapter bluetoothAdapter = null;
+
+    private static final ArrayList<DataForDaemon.DeviceInfo> daemonDevices = new ArrayList<>();
     private static ArrayList<ThreadConnect> connects = new ArrayList<>();
 
+    private static boolean isActivityDeviceWaitToStart = false;
+    private boolean isNeedRestartActivityConnection = false;
+    private DataForDaemon.DeviceInfo activityDevice;
     private ThreadConnect activityThreadConnect;
-    private ActivityThreadConnected activityConnectedThread;
 
-    BluetoothThreadDaemon(Context context) {
+    BluetoothThreadDaemon(final Context context) {
+        Runnable runnable = null;
         if (!context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH)){
-            Toast.makeText(context, "BLUETOOTH NOT support", Toast.LENGTH_LONG).show();
+            runnable = new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(context, "BLUETOOTH NOT support", Toast.LENGTH_LONG).show();
+                }
+            };
         } else {
             bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
             if (bluetoothAdapter == null) {
-                Toast.makeText(context, "Bluetooth не поддерживается вашим утройством(", Toast.LENGTH_LONG).show();
-            } else if (!bluetoothAdapter.isEnabled()) {
-                Toast.makeText(context, "Пожалуйста включите Bluetooth", Toast.LENGTH_LONG).show();
+                runnable = new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(context, "Bluetooth не поддерживается вашим утройством(", Toast.LENGTH_LONG).show();
+                    }
+                };
             }
         }
+        if(runnable != null) ((MainActivity) context).runOnUiThread(runnable);
         setDaemon(true);
     }
 
@@ -53,25 +70,67 @@ class BluetoothThreadDaemon extends Thread {
         return list;
     }
 
-    boolean checkDevice(DataForDaemon.DeviceInfo device) {
-        for(DataForDaemon.DeviceInfo selectedDevice: devices) {
-            if(selectedDevice.position == device.position) {
-                devices.remove(selectedDevice);
-                return true;
+    void checkDevice(int position) {
+        synchronized (daemonDevices) {
+            for (DataForDaemon.DeviceInfo selectedDevice : daemonDevices) {
+                if (selectedDevice.position == position) {
+                    activityDevice = selectedDevice;
+                    isActivityDeviceWaitToStart = true;
+                    connects.get(daemonDevices.indexOf(selectedDevice)).close();
+                    daemonDevices.remove(selectedDevice);
+                    MainActivity.devices.get(position).checkingDevice(false);
+                }
             }
         }
-        return false;
+    }
+
+    void setActivityDevice (DataForDaemon.DeviceInfo device) {
+        if(activityDevice == null) {
+            activityDevice = device;
+            activityStarted();
+        }
+    }
+
+    private void activityStarted() {
+        final DataForDaemon.DeviceInfo deviceInfo = activityDevice;
+        isActivityDeviceWaitToStart = false;
+        isNeedRestartActivityConnection = false;
+        if(!bluetoothAdapter.isEnabled()) {
+            ((DeviceMenuActivity) deviceInfo.parentContext).runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(deviceInfo.parentContext, "Пожалуйста включите Bluetooth", Toast.LENGTH_LONG).show();
+                    ((DeviceMenuActivity) deviceInfo.parentContext).findViewById(R.id.infoTextView).setVisibility(View.VISIBLE);
+                    ((DeviceMenuActivity) deviceInfo.parentContext).findViewById(R.id.loadTimers).setVisibility(View.GONE);
+                }
+            });
+            isNeedRestartActivityConnection = true;
+            return;
+        }
+        Log.d("DaemonActivity", "Работа с устройством");
+        BluetoothDevice device = bluetoothAdapter.getRemoteDevice(MainActivity.devices.get(deviceInfo.position).getBT_MAC());
+        UUID uuid = UUID.fromString(idForUUID);
+        try {
+            BluetoothSocket socket = device.createRfcommSocketToServiceRecord(uuid);
+            activityThreadConnect = new ThreadConnect(socket, deviceInfo.parentContext, deviceInfo.position);
+            activityThreadConnect.start();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     void activityClosed() {
+        MainActivity.data.clearCommands();
+        activityDevice = null;
+        isNeedRestartActivityConnection = false;
         if(activityThreadConnect != null) {
             activityThreadConnect.interrupt();
             activityThreadConnect = null;
-            if(activityConnectedThread != null) {
-                activityConnectedThread.interrupt();
-                activityConnectedThread = null;
-            }
         }
+    }
+
+    boolean isSleep() {
+        return isSleeping;
     }
 
     @Override
@@ -82,26 +141,43 @@ class BluetoothThreadDaemon extends Thread {
         BluetoothSocket socket;
         ThreadConnect threadConnect;
         while(!isInterrupted()) {
-            if(!bluetoothAdapter.isEnabled()) continue; // TODO: уведомление
+            if(!bluetoothAdapter.isEnabled()) {
+                if(activityDevice != null) {
+                    DeviceMenuActivity.isBluetoothOn = false;
+
+                }
+                isSleeping = true;
+                while (!bluetoothAdapter.isEnabled()) {
+                    try {
+                        sleep(100);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                        interrupt();
+                        break;
+                    }
+                }
+                isSleeping = false;
+                if(isNeedRestartActivityConnection) activityStarted();
+                continue;
+            }
             if(connects.size() >= 3) continue;
 
-            currentDevice = areThereAnyDevicesToConnect();
+            currentDevice = MainActivity.data.getDeviceFromQueue();
             if(currentDevice == null) continue;
+            Log.d("Daemon", "Устройство получено из очереди");
+
+            synchronized (daemonDevices) {
+                daemonDevices.add(currentDevice);
+            }
 
             Log.d("Daemon", "Работа с устройством");
             device = bluetoothAdapter.getRemoteDevice(MainActivity.devices.get(currentDevice.position).getBT_MAC());
             uuid = UUID.fromString(idForUUID);
             try {
                 socket = device.createRfcommSocketToServiceRecord(uuid);
-                if(currentDevice.isActivityDevice) {
-                    threadConnect = new ThreadConnect(socket, currentDevice.parentContext, currentDevice.position);
-                    activityThreadConnect = threadConnect;
-                }
-                else {
-                    threadConnect = new ThreadConnect(socket, currentDevice.parentContext, currentDevice.position, currentDevice.isSet, currentDevice.isOnLamp);
-                    connects.add(threadConnect);
-                    Log.d("Daemon", "Запущен поток подключения");
-                }
+                threadConnect = new ThreadConnect(socket, currentDevice.parentContext, currentDevice.position, currentDevice.isSet, currentDevice.isOnLamp);
+                connects.add(threadConnect);
+                Log.d("Daemon", "Запущен поток подключения");
                 threadConnect.start();
             } catch (IOException e) {
                 MainActivity.data.addDevice(currentDevice);
@@ -110,15 +186,7 @@ class BluetoothThreadDaemon extends Thread {
         }
     }
 
-    private DataForDaemon.DeviceInfo areThereAnyDevicesToConnect() {
-        if (!MainActivity.data.isEmpty()) {
-            Log.d("Daemon", "Устройство получено из очереди");
-            return MainActivity.data.getDeviceFromQueue();
-        }
-        return null;
-    }
-
-    private class ThreadConnect extends Thread {
+    private static class ThreadConnect extends Thread {
         private Context context;
         private int position;
         private boolean isActivityDevice;
@@ -130,8 +198,6 @@ class BluetoothThreadDaemon extends Thread {
         private OutputStream connectedOutputStream = null;
         private String print;
         private StringBuilder sb = new StringBuilder();
-
-        private boolean isCanChangeOnActivityThread = true;
 
         private ThreadConnect(BluetoothSocket socket, Context context, int position, boolean isSet, boolean isOnLamp) {
             this.bluetoothSocket = socket;
@@ -157,45 +223,48 @@ class BluetoothThreadDaemon extends Thread {
                 connectSuccess = true;
             }catch (IOException e) {
                 e.printStackTrace();
-                Runnable runnable = new Runnable() {
-                    @Override
-                    public void run() {
-                        MainActivity.devices.get(position).setConnectionStatus(Device.DEVICE_STATUS_OFFLINE);
-                        MainActivity.adapterR.notifyItemChanged(position);
-                    }
-                };
-                if(isActivityDevice) ((DeviceMenuActivity) context).runOnUiThread(runnable);
-                else ((MainActivity) context).runOnUiThread(runnable);
+
+                MainActivity.devices.get(position).setConnectionStatus(Device.DEVICE_STATUS_OFFLINE);
+                MainActivity.devices.get(position).checkingDevice(false);
+
+                if(isActivityDevice) {
+                    ((DeviceMenuActivity) context).runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            ((DeviceMenuActivity) context).findViewById(R.id.loadTimers).setVisibility(View.GONE);
+                            ((DeviceMenuActivity) context).findViewById(R.id.infoTextView).setVisibility(View.VISIBLE);
+                        }
+                    });
+                } else {
+                    ((MainActivity) context).runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            MainActivity.adapterR.notifyItemChanged(position);
+                        }
+                    });
+                }
 
                 close();
             }
 
             if(connectSuccess) {
                 Log.d("Daemon", "Устройство подключено");
-                Runnable runnable = new Runnable() {
-                    @Override
-                    public void run() {
-                        MainActivity.devices.get(position).setConnectionStatus(Device.DEVICE_STATUS_ONLINE);
-                        MainActivity.adapterR.notifyItemChanged(position);
-                    }
-                };
-                if(isActivityDevice) ((DeviceMenuActivity) context).runOnUiThread(runnable);
-                else ((MainActivity) context).runOnUiThread(runnable);
 
-                if(isInterrupted()) {
+                MainActivity.devices.get(position).setConnectionStatus(Device.DEVICE_STATUS_ONLINE);
+                MainActivity.devices.get(position).setDeviceIsOn(Device.DEVICE_ON_OR_OFF);
 
+                if(!isActivityDevice) {
+                    ((MainActivity) context).runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            MainActivity.adapterR.notifyItemChanged(position);
+                        }
+                    });
                 }
 
-                isCanChangeOnActivityThread = false;
-                if(isActivityDevice) {
-                    ActivityThreadConnected threadConnected = new ActivityThreadConnected(bluetoothSocket, context, position);
-                    threadConnected.start();
-                    activityConnectedThread = threadConnected;
-                } else {
-                    ThreadConnected threadConnected = new ThreadConnected(bluetoothSocket, context, position, isSet, isOnLamp);
-                    threadConnected.setItIsMyParent(this);
-                    threadConnected.start();
-                    Log.d("Daemon", "Запущен поток передачи");
+                if(isInterrupted()) {
+                    close();
+                    return;
                 }
 
                 try {
@@ -208,91 +277,46 @@ class BluetoothThreadDaemon extends Thread {
 
                 if(isActivityDevice) startActivityCommunication();
                 else startCommunication();
-
-                close();
             }
         }
 
         void startCommunication(){
             Log.d("Daemon", "Отправка данных");
-            boolean isWait = false;
             try {
                 if(isSet) {
-                    if(isOnLamp) connectedOutputStream.write("cL1".getBytes());
-                    else connectedOutputStream.write("cL0".getBytes());
+                    if(isOnLamp) connectedOutputStream.write("sSD-1;".getBytes());
+                    else connectedOutputStream.write("sSD-0;".getBytes());
                 }
-                connectedOutputStream.write("gSL;".getBytes());
-                isWait = true;
+                connectedOutputStream.write("gSD;".getBytes());
+                Log.d("Daemon", "Данные отправлены");
             } catch (IOException e) {
                 e.printStackTrace();
+                Log.d("Daemon", "Неудалось отправить данные");
+                return;
             }
 
             Log.d("Daemon", "Получение данных");
             int counter = 0;
-            while (isWait && (counter < 50)) {
+            while (counter < 50) {
                 counter++;
                 try {
                     if(connectedInputStream.available() <= 0) {
                         Thread.sleep(100);
-                        continue;
-                    }
-
-                    byte[] buffer = new byte[1];
-                    int bytes = connectedInputStream.read(buffer);
-                    String strIn = new String(buffer, 0, bytes);
-                    sb.append(strIn);
-                    int endOfLineIndex = sb.indexOf("\r\n");
-
-                    if(endOfLineIndex > 0) {
-                        print = sb.substring(0, endOfLineIndex);
-                        if(print.startsWith("sL")) {
-                            sb.delete(0, 2);
-                            print = sb.substring(0, sb.indexOf("\r\n"));
+                        Log.d("Daemon", "Данных нет");
+                        if(counter == 50) {
                             ((MainActivity) context).runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    if(print.equals("1;")) {
-                                        MainActivity.devices.get(position).setDeviceIsOn(true);
-                                    } else {
-                                        MainActivity.devices.get(position).setDeviceIsOn(false);
-                                    }
+                                    MainActivity.devices.get(position).setDeviceIsOn(Device.DEVICE_ON_OR_OFF);
+                                    MainActivity.devices.get(position).checkingDevice(false);
                                     MainActivity.adapterR.notifyItemChanged(position);
                                 }
                             });
-                            break;
                         }
-                        sb.delete(0, sb.length());
-                        // TODO log
-                    }
-                } catch (IOException | InterruptedException e) {
-                    isWait = false;
-                }
-            }
-        }
-
-        void startActivityCommunication(){
-            boolean isWaitAnswer = false;
-            int timeCounter = 0;
-
-            Log.d("Daemon", "Проверка наличия данных для отправки");
-            String sendData;
-            if((sendData = MainActivity.data.getCommandForActivityDevice()) != null) {
-                try {
-                    connectedOutputStream.write(sendData.getBytes());
-                    //if(BTDevice.isGetRequest(sendData)) isWaitAnswer = true;
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-
-            Log.d("Daemon", "Получение данных");
-            while (isWaitAnswer && timeCounter < 50) {
-                try {
-                    if(connectedInputStream.available() <= 0) {
-                        Thread.sleep(100);
                         continue;
                     }
 
+                    Log.d("Daemon", "Данные получаются");
                     byte[] buffer = new byte[1];
                     int bytes = connectedInputStream.read(buffer);
                     String strIn = new String(buffer, 0, bytes);
@@ -300,216 +324,124 @@ class BluetoothThreadDaemon extends Thread {
                     int endOfLineIndex = sb.indexOf(";");
 
                     if(endOfLineIndex > 0) {
+                        Log.d("Daemon", "Данные получены");
                         print = sb.substring(0, endOfLineIndex);
-                        if(print.startsWith("sL")) {
-                            sb.delete(0, 2);
-                            print = sb.substring(0, sb.indexOf("\r\n"));
+                        if(print.startsWith("sD")) {
+                            Log.d("Daemon", "Ответ правильный - " + print);
+                            sb.delete(0, 3);
+                            print = sb.substring(0, sb.indexOf(";"));
+                            Log.d("Daemon", "Ответ на проверку - " + print);
                             ((MainActivity) context).runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    if(print.equals("1;")) {
-                                        MainActivity.devices.get(position).setDeviceIsOn(true);
+                                    if(print.equals("1")) {
+                                        MainActivity.devices.get(position).setDeviceIsOn(Device.DEVICE_ON);
                                     } else {
-                                        MainActivity.devices.get(position).setDeviceIsOn(false);
+                                        MainActivity.devices.get(position).setDeviceIsOn(Device.DEVICE_OFF);
                                     }
+                                    MainActivity.devices.get(position).checkingDevice(false);
                                     MainActivity.adapterR.notifyItemChanged(position);
                                 }
                             });
                             break;
                         }
                         sb.delete(0, sb.length());
-                        // TODO log
                     }
                 } catch (IOException | InterruptedException e) {
-                    //TODO
+                    counter = 50;
                 }
             }
+            Log.d("Daemon", "Закрытие потока");
+            close();
         }
 
-        boolean isCanChangeOnActivityThread() {
-            return isCanChangeOnActivityThread;
+        void startActivityCommunication(){
+            while(!isInterrupted()) {
+                String sendData;
+                if ((sendData = MainActivity.data.getCommandForActivityDevice()) != null) {
+                    try {
+                        Log.d("DaemonActivity", "Отправка данных " + sendData);
+                        connectedOutputStream.write(sendData.getBytes());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                try {
+                    if(connectedInputStream.available() <= 0) {
+                        Thread.sleep(100);
+                        continue;
+                    }
+
+                    Log.d("DaemonActivity", "Данные получаются");
+                    byte[] buffer = new byte[1];
+                    int bytes = connectedInputStream.read(buffer);
+                    String strIn = new String(buffer, 0, bytes);
+                    sb.append(strIn);
+                    int endOfLineIndex = sb.indexOf(";");
+
+                    if(endOfLineIndex > 0) {
+                        Log.d("DaemonActivity", "Данные получены");
+                        print = sb.substring(0, endOfLineIndex);
+                        print = print.replace("\n", "");
+                        print = print.replace("\r", "");
+                        Log.d("DaemonActivity", print);
+
+                        ((DeviceMenuActivity) context).runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                if(print.startsWith("sD")) {
+                                    Log.d("DaemonActivity", "Совпадение с sD");
+                                    int isOn = BTDevice.GetData.statusDevice(print);
+                                    MainActivity.devices.get(position).setDeviceIsOn(isOn);
+                                    ((Switch) ( (DeviceMenuActivity) context).findViewById(R.id.statusDeviceSwitch)).setChecked(isOn == 1);
+                                } else if(print.startsWith("cT")) {
+                                    Log.d("DaemonActivity", "Совпадение с cT");
+                                    ((TextView) ( (DeviceMenuActivity) context).findViewById(R.id.deviceTime)).setText(BTDevice.GetData.currentTime(print));
+                                    ((DeviceMenuActivity) context).timeGotten();
+                                } else if(print.startsWith("aTs")) {
+                                    Log.d("DaemonActivity", "Совпадение с aTs");
+                                    DeviceMenuActivity.amountTimers = BTDevice.GetData.amountTimers(print);
+                                    ((DeviceMenuActivity) context).putTimers();
+                                } else if (print.startsWith("t")) {
+                                    Log.d("DaemonActivity", "Совпадение с t");
+                                    Timer timer = BTDevice.GetData.timer(print);
+                                    if(timer.getId() < DeviceMenuActivity.timers.size()) {
+                                        DeviceMenuActivity.timers.set(timer.getId(), timer);
+                                        DeviceMenuActivity.adapterR.notifyItemChanged(timer.getId());
+                                    } else {
+                                        DeviceMenuActivity.timers.add(timer);
+                                        DeviceMenuActivity.adapterR.notifyItemInserted(timer.getId());
+                                    }
+                                    ((DeviceMenuActivity) context).timerGotten();
+                                }
+                            }
+                        });
+                        sb.delete(0, sb.length());
+                    }
+                } catch (IOException | InterruptedException e) {
+                    interrupt();
+                }
+            }
+            Log.d("DaemonActivity", "Закрытие потока");
+            close();
         }
 
         void close() {
+            synchronized (daemonDevices) {
+                try {
+                    daemonDevices.remove(connects.indexOf(this));
+                } catch (ArrayIndexOutOfBoundsException e) {
+                    e.printStackTrace();
+                }
+            }
             connects.remove(this);
             try {
                 bluetoothSocket.close();
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        }
-    }
-
-    private static class ThreadConnected extends Thread {
-        private InputStream connectedInputStream;
-        private OutputStream connectedOutputStream;
-
-        private String print;
-        private StringBuilder sb = new StringBuilder();
-        private Context context;
-        private int position;
-        private boolean isSet;
-        private boolean isOnLamp;
-
-        private ThreadConnect itIsMyParent;
-
-        ThreadConnected(BluetoothSocket socket, Context context, int pos, boolean isSet, boolean isOnLamp) {
-            InputStream in = null;
-            OutputStream out = null;
-            this.context = context;
-            this.position = pos;
-            this.isSet = isSet;
-            this.isOnLamp = isOnLamp;
-
-            try {
-                in = socket.getInputStream();
-                out = socket.getOutputStream();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            connectedInputStream = in;
-            connectedOutputStream = out;
-        }
-
-        void setItIsMyParent(ThreadConnect threadConnect) {
-            this.itIsMyParent = threadConnect;
-        }
-
-        @Override
-        public void run() {
-            Log.d("Daemon", "Поток общения начал работу");
-            boolean isWait = false;
-            int counter = 0;
-            try {
-                if(isSet) {
-                    if(isOnLamp) connectedOutputStream.write("cL1".getBytes());
-                    else connectedOutputStream.write("cL0".getBytes());
-                }
-                connectedOutputStream.write("gSL;".getBytes());
-                Log.d("Daemon", "Отправлен запрос на получения статуса лампы");
-                isWait = true;
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            while (isWait && (counter < 50)) {
-                if(counter == 0) Log.d("Daemon", "Ожидание ввода");
-                Log.d("Daemon", "Counter: " + counter);
-                counter++;
-                try {
-                    Log.d("Daemon", "Вход в try");
-                    byte[] buffer = new byte[1];
-                    if(connectedInputStream.available() <= 0) {
-                        Log.d("Daemon", "Данных нет, сон");
-                        Thread.sleep(100);
-                        continue;
-                    }
-                    Log.d("Daemon", "Данные есть, чтение");
-                    int bytes = connectedInputStream.read(buffer);
-                    String strIn = new String(buffer, 0, bytes);
-                    sb.append(strIn);
-                    int endOfLineIndex = sb.indexOf("\r\n");
-
-                    if(endOfLineIndex > 0) {
-                        Log.d("Daemon", "Чтение окончено");
-                        print = sb.substring(0, endOfLineIndex);
-                        if(print.startsWith("sL")) {
-                            Log.d("Daemon", "Ввод получен");
-                            sb.delete(0, 2);
-                            print = sb.substring(0, sb.indexOf("\r\n"));
-                            ((MainActivity) context).runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    if(print.equals("1;")) {
-                                        MainActivity.devices.get(position).setDeviceIsOn(true);
-                                    } else {
-                                        MainActivity.devices.get(position).setDeviceIsOn(false);
-                                    }
-                                    MainActivity.adapterR.notifyItemChanged(position);
-                                }
-                            });
-                            break;
-                        }
-                        sb.delete(0, sb.length());
-                        // TODO log
-                    }
-                } catch (IOException | InterruptedException e) {
-                    isWait = false;
-                }
-            }
-
-            Log.d("Daemon", "Окончание ожидания ввода" + counter);
-            itIsMyParent.close();
-            itIsMyParent = null;
-        }
-    }
-
-    private static class ActivityThreadConnected extends Thread {
-        private final InputStream connectedInputStream;
-        private final OutputStream connectedOutputStream;
-
-        private String print;
-        private StringBuilder sb = new StringBuilder();
-        private Context context;
-        private int position;
-
-        ActivityThreadConnected(BluetoothSocket socket, Context context, int pos) {
-            InputStream in = null;
-            OutputStream out = null;
-            this.context = context;
-            this.position = pos;
-
-            try {
-                in = socket.getInputStream();
-                out = socket.getOutputStream();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            connectedInputStream = in;
-            connectedOutputStream = out;
-        }
-
-        @Override
-        public void run() {
-            while (!isInterrupted()) {
-                try {
-                    byte[] buffer = new byte[1];
-                    int bytes = connectedInputStream.read(buffer);
-                    String strIn = new String(buffer, 0, bytes);
-                    sb.append(strIn);
-                    int endOfLineIndex = sb.indexOf("\r\n");
-
-                    if(endOfLineIndex > 0) {
-                        print = sb.substring(0, endOfLineIndex);
-                        sb.delete(0, sb.length());
-
-                        ((DeviceMenuActivity) context).runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                switch (print) {
-                                    case "gSL":
-                                        //TODO
-                                        break;
-                                    case "gT":
-                                        //TODO it
-                                        break;
-                                }
-                            }
-                        });
-                    }
-                } catch (IOException e) {
-                    break;
-                }
-            }
-        }
-
-        public void write(byte[] buffer) {
-            try {
-                connectedOutputStream.write(buffer);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            if(isActivityDeviceWaitToStart) MainActivity.daemon.activityStarted();
         }
     }
 }

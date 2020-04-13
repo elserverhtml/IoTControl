@@ -7,7 +7,9 @@ import java.util.List;
 
 abstract class Device {
     private final static  int IMAGE_BT_CONNECTED = R.drawable.ic_bluetooth_connected;
+    private final static  int IMAGE_BT_CONNECT_UNKNOWN = R.drawable.ic_bluetooth_unknown;
     private final static  int IMAGE_BT_DISCONNECTED = R.drawable.ic_bluetooth_disconnected;
+    private final static  int IMAGE_WF_CONNECT_UNKNOWN = R.drawable.ic_wifi_unknown;
     private final static  int IMAGE_WF_CONNECTED = R.drawable.ic_wifi_connected;
     private final static  int IMAGE_WF_DISCONNECTED = R.drawable.ic_wifi_disconnected;
     final static  int IMAGE_DEVICE_ON = R.drawable.ic_device_on;
@@ -17,62 +19,59 @@ abstract class Device {
     final static int DEVICE_STATUS_ONLINE = 2;
     final static int DEVICE_STATUS_OFFLINE = 1;
 
-    private int image_connected;
-    private int image_disconnected;
-    private int image_deviceOn ;
-    private int image_deviceOff;
+    final static int DEVICE_ON = 1;
+    final static int DEVICE_OFF = 0;
+    final static int DEVICE_ON_OR_OFF = -1;
 
-    private int deviceId;
+    private int imageConnected;
+    private int imageConnectUnknown;
+    private int imageDisconnected;
+    private int imageDeviceOn;
+    private int imageDeviceOff;
+
+    private int position;
     private String name;
-    private boolean deviceIsOn = false;
+    private int deviceIsOn = -1;
     private int connectionStatus = DEVICE_STATUS_WAITING;
     private List<Timer> timers = new ArrayList<>();
-
+    private boolean isChecking = false;
     private boolean typeConnectionIsBluetooth;
+
     private String BT_MAC = "";
     // TODO: wifi settings...
 
-    Device(String name, boolean typeConnectionIsBluetooth) {
+    Device(int position, String name, boolean typeConnectionIsBluetooth) {
+        this(position, name, typeConnectionIsBluetooth, IMAGE_DEVICE_ON, IMAGE_DEVICE_OFF);
+    }
+
+    Device(int position, String name, boolean typeConnectionIsBluetooth, int imageDeviceOn, int imageDeviceOff) {
+        this.position = position;
         this.name = name;
         this.typeConnectionIsBluetooth = typeConnectionIsBluetooth;
 
         if(this.typeConnectionIsBluetooth) {
-            this.image_connected = Device.IMAGE_BT_CONNECTED;
-            this.image_disconnected = Device.IMAGE_BT_DISCONNECTED;
+            this.imageConnected = Device.IMAGE_BT_CONNECTED;
+            this.imageConnectUnknown = Device.IMAGE_BT_CONNECT_UNKNOWN;
+            this.imageDisconnected = Device.IMAGE_BT_DISCONNECTED;
         } else {
-            this.image_connected = Device.IMAGE_WF_CONNECTED;
-            this.image_disconnected = Device.IMAGE_WF_DISCONNECTED;
+            this.imageConnected = Device.IMAGE_WF_CONNECTED;
+            this.imageConnectUnknown = Device.IMAGE_WF_CONNECT_UNKNOWN;
+            this.imageDisconnected = Device.IMAGE_WF_DISCONNECTED;
         }
 
-        this.image_deviceOn = Device.IMAGE_DEVICE_ON;
-        this.image_deviceOff = Device.IMAGE_DEVICE_OFF;
+        this.imageDeviceOn = imageDeviceOn;
+        this.imageDeviceOff = imageDeviceOff;
     }
 
-    Device(String name, boolean typeConnectionIsBluetooth, int image_deviceOn, int image_deviceOff) {
-        this.name = name;
-        this.typeConnectionIsBluetooth = typeConnectionIsBluetooth;
+    abstract void isCanConnect(Context context);
+    abstract void controlDeviceFromList(Context context, boolean isOn);
+    abstract void connectToDevice(Context context);
 
-        if(this.typeConnectionIsBluetooth) {
-            this.image_connected = Device.IMAGE_BT_CONNECTED;
-            this.image_disconnected = Device.IMAGE_BT_DISCONNECTED;
-        } else {
-            this.image_connected = Device.IMAGE_WF_CONNECTED;
-            this.image_disconnected = Device.IMAGE_WF_DISCONNECTED;
-        }
-
-        this.image_deviceOn = image_deviceOn;
-        this.image_deviceOff = image_deviceOff;
+    int getPosition() {
+        return position;
     }
-
-    abstract void isCanConnect(Context context, int pos);
-    abstract void controlDeviceFromList(Context context, int pos, boolean isOn);
-    abstract void connectToDevice(Context context, int pos);
-
-    public int getDeviceId() {
-        return deviceId;
-    }
-    public void setDeviceId(int deviceId) {
-        this.deviceId = deviceId;
+    void setPosition(int position) {
+        this.position = position;
     }
 
     void setName(String name){
@@ -82,10 +81,10 @@ abstract class Device {
         return this.name;
     }
 
-    boolean isOn() {
+    int isOn() {
         return deviceIsOn;
     }
-    void setDeviceIsOn(boolean isOn) {
+    void setDeviceIsOn(int isOn) {
         this.deviceIsOn = isOn;
     }
 
@@ -108,31 +107,38 @@ abstract class Device {
     }
 
     int getImageConnected() {
-        return image_connected;
+        return imageConnected;
     }
     void setImageConnected(int image_connected) {
-        this.image_connected = image_connected;
+        this.imageConnected = image_connected;
+    }
+
+    int getImageConnectUnknown() {
+        return imageConnectUnknown;
+    }
+    void setImageConnectUnknown(int imageConnectUnknown) {
+        this.imageConnectUnknown = imageConnectUnknown;
     }
 
     int getImageDisconnected() {
-        return image_disconnected;
+        return imageDisconnected;
     }
     void setImageDisconnected(int image_disconnected) {
-        this.image_disconnected = image_disconnected;
+        this.imageDisconnected = image_disconnected;
     }
 
     int getImageDeviceOn() {
-        return image_deviceOn;
+        return imageDeviceOn;
     }
     void setImageDeviceOn(int image_deviceOn) {
-        this.image_deviceOn = image_deviceOn;
+        this.imageDeviceOn = image_deviceOn;
     }
 
     int getImageDeviceOff() {
-        return image_deviceOff;
+        return imageDeviceOff;
     }
     void setImageDeviceOff(int image_deviceOff) {
-        this.image_deviceOff = image_deviceOff;
+        this.imageDeviceOff = image_deviceOff;
     }
 
     List<Timer> getAllTimers() {
@@ -146,5 +152,12 @@ abstract class Device {
     }
     void removeTimer(int id) {
         timers.remove(id);
+    }
+
+    void checkingDevice(boolean isChecking) {
+        this.isChecking = isChecking;
+    }
+    boolean isChecking() {
+        return this.isChecking;
     }
 }

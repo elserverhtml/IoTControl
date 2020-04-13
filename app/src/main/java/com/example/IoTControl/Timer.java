@@ -1,10 +1,10 @@
 package com.example.IoTControl;
 
 class Timer {
-    private final static int MODE_EVERYDAY = 127;
-    private final static int MODE_WEEKDAY = 62;
-    private final static int MODE_WEEKEND = 65;
-    private final static int MODE_SINGLY = 0;
+    final static int MODE_EVERYDAY = 127;
+    final static int MODE_WEEKDAY = 62;
+    final static int MODE_WEEKEND = 65;
+    final static int MODE_SINGLY = 0;
 
     private int id;
     private int days;

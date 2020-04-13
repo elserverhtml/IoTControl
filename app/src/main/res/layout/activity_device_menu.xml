@@ -4,8 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".DeviceMenuActivity"
-    android:screenOrientation="portrait">
+    android:screenOrientation="portrait"
+    tools:context=".DeviceMenuActivity">
 
     <LinearLayout
         android:id="@+id/linearLayout1"
@@ -17,6 +17,7 @@
         android:paddingStart="16dp"
         android:paddingTop="10dp"
         android:paddingEnd="10dp"
+        app:layout_constraintBottom_toTopOf="@+id/linearLayout2"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
@@ -38,32 +39,19 @@
             android:text="" />
     </LinearLayout>
 
-    <TextView
-        android:id="@+id/outOfSightView"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:gravity="center"
-        android:padding="6dp"
-        android:text="@string/out_of_sight"
-        android:textSize="32sp"
-        android:visibility="visible"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/linearLayout1" />
-
     <LinearLayout
         android:id="@+id/linearLayout2"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="0dp"
         android:orientation="vertical"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/line"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/line"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/linearLayout1">
 
         <LinearLayout
+            android:id="@+id/infoView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@color/colorPrimary"
@@ -71,7 +59,8 @@
             android:orientation="horizontal"
             android:paddingStart="16dp"
             android:paddingEnd="10dp"
-            android:paddingBottom="5dp">
+            android:paddingBottom="5dp"
+            android:visibility="gone">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -86,7 +75,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text=""
-                android:textSize="18sp" />
+                android:textSize="15sp" />
 
             <ImageButton
                 android:id="@+id/buttonSync"
@@ -96,6 +85,7 @@
                 android:layout_weight="0"
                 android:backgroundTint="#0000"
                 android:contentDescription="@string/synchronize_time"
+                android:visibility="gone"
                 app:srcCompat="@drawable/ic_sync" />
 
         </LinearLayout>
@@ -104,7 +94,83 @@
             android:id="@+id/timerListR"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:visibility="gone"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+
+        <TextView
+            android:id="@+id/infoTextView"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:padding="6dp"
+            android:text="@string/out_of_sight"
+            android:textSize="32sp"
+            android:visibility="gone" />
     </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/line"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#C1C1C1"
+        android:orientation="horizontal"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@+id/buttonBar"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/linearLayout2" />
+
+    <LinearLayout
+        android:id="@+id/buttonBar"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="#fff"
+        android:orientation="horizontal"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <ImageButton
+            android:id="@+id/addButtonTimer"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:backgroundTint="#0000"
+            android:contentDescription="@string/createNewTimer"
+            android:tint="@color/lightOrange"
+            app:srcCompat="@drawable/ic_add" />
+
+        <ImageButton
+            android:id="@+id/editButtonTimers"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:backgroundTint="#0000"
+            android:contentDescription="@string/editTimers"
+            android:tint="@color/lightOrange"
+            app:srcCompat="@drawable/ic_edit" />
+
+        <ImageButton
+            android:id="@+id/OKButtonTimers"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:backgroundTint="#0000"
+            android:visibility="gone"
+            android:contentDescription="@string/editTimers"
+            android:tint="@color/lightOrange"
+            app:srcCompat="@drawable/ic_ok" />
+    </LinearLayout>
+
+    <ProgressBar
+        android:id="@+id/loadTimers"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="visible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout1" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

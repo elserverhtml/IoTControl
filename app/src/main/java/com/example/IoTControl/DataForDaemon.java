@@ -6,22 +6,21 @@ import android.util.Log;
 import java.util.ArrayDeque;
 
 class DataForDaemon {
-    private ArrayDeque<DeviceInfo> deviceArrayDeque = new ArrayDeque<>();
+    private final ArrayDeque<DeviceInfo> deviceArrayDeque = new ArrayDeque<>();
     private ArrayDeque<String> commandForActivityDevice = new ArrayDeque<>();
 
     DeviceInfo getDeviceFromQueue() {
-        return deviceArrayDeque.pollFirst();
+        synchronized (deviceArrayDeque) {
+            if (!deviceArrayDeque.isEmpty()) return deviceArrayDeque.pollFirst();
+            else return null;
+        }
     }
 
     void addDevice(DeviceInfo device) {
-        device.isActivityDevice = false;
-        deviceArrayDeque.addLast(device);
+        synchronized (deviceArrayDeque) {
+            deviceArrayDeque.addLast(device);
+        }
         Log.d("Data", "Устройство добавлено");
-    }
-
-    void addActivityDevice(DeviceInfo device) {
-        device.isActivityDevice = true;
-        deviceArrayDeque.addFirst(device);
     }
 
     String getCommandForActivityDevice() {
@@ -30,18 +29,32 @@ class DataForDaemon {
         else return null;
     }
 
-    void addCommandForActivityDevice(String string) {
-        commandForActivityDevice.addLast(string);
+    void setCommandForActivityDevice(String commandForActivityDevice) {
+        this.commandForActivityDevice.addLast(commandForActivityDevice);
     }
 
-    boolean isEmpty() {
-        return deviceArrayDeque.isEmpty();
+    void clearCommands() {
+        synchronized (deviceArrayDeque) {
+            this.commandForActivityDevice.clear();
+        }
+    }
+
+    void isDeviceInDeque(DeviceInfo deviceInfo) {
+        synchronized (deviceArrayDeque) {
+            for (DataForDaemon.DeviceInfo selectedDevice : deviceArrayDeque) {
+                if (selectedDevice.position == deviceInfo.position) {
+                    MainActivity.devices.get(deviceInfo.position).checkingDevice(false);
+                    deviceArrayDeque.remove(selectedDevice);
+                    MainActivity.daemon.setActivityDevice(selectedDevice);
+                }
+            }
+            MainActivity.daemon.checkDevice(deviceInfo.position);
+        }
     }
 
     static class DeviceInfo {
-        int position; // or id
+        int position;
         Context parentContext;
-        boolean isActivityDevice;
         boolean isSet;
         boolean isOnLamp;
     }

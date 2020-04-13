@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
@@ -21,10 +22,10 @@ public class MainActivity extends AppCompatActivity {
     static DataForDaemon data = new DataForDaemon();
     static BluetoothThreadDaemon daemon;
 
-    private FloatingActionButton addButton, editButton, syncButton, multifunctionButton;
+    private FloatingActionButton addButton, editButton, wifiSettings, multifunctionButton;
 
-    private Animation animHideAdd, animHideEdit, animHideSync, animHideMultifunction,
-            animShowAdd, animShowEdit, animShowSync, animShowMultifunction;
+    private Animation animHideAdd, animHideEdit, animHideWFSet, animHideMultifunction,
+            animShowAdd, animShowEdit, animShowWFSet, animShowMultifunction;
     private boolean isMenuOpen = false;
     private boolean isEditMode = false;
 
@@ -46,7 +47,6 @@ public class MainActivity extends AppCompatActivity {
 
         daemon = new BluetoothThreadDaemon(this);
         daemon.start();
-        Log.d("Main", "start: " + daemon.isAlive());
     }
 
     @Override
@@ -54,10 +54,10 @@ public class MainActivity extends AppCompatActivity {
         super.onStart();
         animHideAdd.setDuration(0);
         animHideEdit.setDuration(0);
-        animHideSync.setDuration(0);
+        animHideWFSet.setDuration(0);
         addButton.startAnimation(animHideAdd);
         editButton.startAnimation(animHideEdit);
-        syncButton.startAnimation(animHideSync);
+        wifiSettings.startAnimation(animHideWFSet);
     }
 
     @Override
@@ -68,15 +68,15 @@ public class MainActivity extends AppCompatActivity {
 
     public void openMenu() {
         if(isMenuOpen) return;
-        if(animHideSync.getDuration() == 0) {
+        if(animHideWFSet.getDuration() == 0) {
             animHideAdd.setDuration(200);
             animHideEdit.setDuration(200);
-            animHideSync.setDuration(200);
+            animHideWFSet.setDuration(200);
         }
         isMenuOpen = true;
+        if(!devices.isEmpty()) editButton.startAnimation(animShowEdit);
         addButton.startAnimation(animShowAdd);
-        editButton.startAnimation(animShowEdit);
-        syncButton.startAnimation(animShowSync);
+        wifiSettings.startAnimation(animShowWFSet);
         multifunctionButton.startAnimation(animShowMultifunction);
         multifunctionButton.setImageResource(R.drawable.ic_close);
     }
@@ -87,17 +87,15 @@ public class MainActivity extends AppCompatActivity {
         if(isFast) {
             animHideAdd.setDuration(30);
             animHideEdit.setDuration(30);
-            animHideSync.setDuration(30);
+            animHideWFSet.setDuration(30);
         }
+        if(!devices.isEmpty()) editButton.startAnimation(animHideEdit);
         addButton.startAnimation(animHideAdd);
-        editButton.startAnimation(animHideEdit);
-        syncButton.startAnimation(animHideSync);
+        wifiSettings.startAnimation(animHideWFSet);
         if(isChangeMultiB) {
             multifunctionButton.startAnimation(animHideMultifunction);
             multifunctionButton.setImageResource(R.drawable.ic_menu);
         }
-        devices.get(0).setConnectionStatus(Device.DEVICE_STATUS_OFFLINE);
-        adapterR.notifyItemChanged(0);
     }
 
     private void editDevices() {
@@ -108,7 +106,7 @@ public class MainActivity extends AppCompatActivity {
         adapterR.notifyItemRangeChanged(0, devices.size());
     }
 
-    private void stopEditDevices() {
+    void stopEditDevices() {
         multifunctionButton.startAnimation(animHideMultifunction);
         multifunctionButton.setImageResource(R.drawable.ic_menu);
         isEditMode = false;
@@ -120,56 +118,26 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void prepareFABs() {
-        addButton = findViewById(R.id.addButton);
         editButton = findViewById(R.id.editButton);
-        syncButton = findViewById(R.id.syncButton);
+        addButton = findViewById(R.id.addButton);
+        wifiSettings = findViewById(R.id.wifiSettings);
         multifunctionButton = findViewById(R.id.multifunctionButton);
 
-        animHideAdd = AnimationUtils.loadAnimation(this, R.anim.fab_add_hide);
-        animHideAdd.setAnimationListener(new Animation.AnimationListener() {
-            @Override
-            public void onAnimationStart(Animation animation) {}
-
-            @Override
-            public void onAnimationEnd(Animation animation) {
-                addButton.setVisibility(View.GONE);
-            }
-
-            @Override
-            public void onAnimationRepeat(Animation animation) {}
-        });
-        animShowAdd = AnimationUtils.loadAnimation(this, R.anim.fab_add_show);
-        animHideEdit = AnimationUtils.loadAnimation(this, R.anim.fab_edit_hide);
-        animHideEdit.setAnimationListener(new Animation.AnimationListener() {
-            @Override
-            public void onAnimationStart(Animation animation) {}
-
-            @Override
-            public void onAnimationEnd(Animation animation) {
-                editButton.setVisibility(View.GONE);
-            }
-
-            @Override
-            public void onAnimationRepeat(Animation animation) {}
-        });
-        animShowEdit = AnimationUtils.loadAnimation(this, R.anim.fab_edit_show);
-        animHideSync = AnimationUtils.loadAnimation(this, R.anim.fab_sync_hide);
-        animHideSync.setAnimationListener(new Animation.AnimationListener() {
-            @Override
-            public void onAnimationStart(Animation animation) {}
-
-            @Override
-            public void onAnimationEnd(Animation animation) {
-                syncButton.setVisibility(View.GONE);
-            }
-
-            @Override
-            public void onAnimationRepeat(Animation animation) {}
-        });
-        animShowSync = AnimationUtils.loadAnimation(this, R.anim.fab_sync_show);
+        animHideEdit = AnimationUtils.loadAnimation(this, R.anim.fab_three_hide);
+        animShowEdit = AnimationUtils.loadAnimation(this, R.anim.fab_three_show);
+        animHideAdd = AnimationUtils.loadAnimation(this, R.anim.fab_two_hide);
+        animShowAdd = AnimationUtils.loadAnimation(this, R.anim.fab_two_show);
+        animHideWFSet = AnimationUtils.loadAnimation(this, R.anim.fab_one_hide);
+        animShowWFSet = AnimationUtils.loadAnimation(this, R.anim.fab_one_show);
         animHideMultifunction = AnimationUtils.loadAnimation(this, R.anim.fab_multifunction_hide);
         animShowMultifunction = AnimationUtils.loadAnimation(this, R.anim.fab_multifunction_show);
 
+        editButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(isMenuOpen && !devices.isEmpty()) editDevices();
+            }
+        });
         addButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -180,15 +148,13 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
-        editButton.setOnClickListener(new View.OnClickListener() {
+        wifiSettings.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(isMenuOpen) editDevices();
-            }
-        });
-        syncButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+                if(MainActivity.daemon.isSleep()) {
+                    Toast.makeText(v.getContext(), "Пожалуйста включите Bluetooth", Toast.LENGTH_LONG).show();
+                    return;
+                }
             }
         });
         multifunctionButton.setOnClickListener(new View.OnClickListener() {
@@ -202,25 +168,25 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setInitialData(){
-        devices.add(new BTDevice("Комната 1", true, "1D:1D:1D:1D:1D:1D"));
-        devices.add(new BTDevice("Комната 2", true, "2E:2E:2E:2E:2E:2E"));
-        devices.add(new BTDevice("Комната 3", true, "3C:3C:3C:3C:3C:3C"));
-        devices.add(new BTDevice("Комната 4", true, "4A:4A:4A:4A:4A:4A"));
-        devices.add(new BTDevice("Комната 5", true, "5B:5B:5B:5B:5B:5B"));
-        devices.add(new BTDevice("Комната 6", true, "6F:6F:6F:6F:6F:6F"));
-        devices.add(new BTDevice("Комната 7", true, "7E:7E:7E:7E:7E:7E"));
-        devices.add(new BTDevice("Комната 8", true, "8C:8C:8C:8C:8C:8C"));
-        devices.add(new BTDevice("Комната 9", true, "9A:9A:9A:9A:9A:9A"));
-        devices.add(new BTDevice("Комната 10", true, "10:10:10:10:10:10"));
-        devices.add(new BTDevice("Комната 11", true, "11:11:11:11:11:11"));
-        devices.add(new BTDevice("Комната 12", true, "12:12:12:12:12:12"));
-        devices.add(new BTDevice("Комната 13", true, "13:13:13:13:13:13"));
-        devices.add(new BTDevice("Комната 14", true, "14:14:14:14:14:14"));
-        devices.add(new BTDevice("Комната 15", true, "15:15:15:15:15:15"));
-        devices.add(new BTDevice("Комната 16", true, "16:16:16:16:16:16"));
-        devices.add(new BTDevice("Комната 17", true, "17:17:17:17:17:17"));
-        devices.add(new BTDevice("Комната 18", true, "18:18:18:18:18:18"));
-        devices.add(new BTDevice("Комната 19", true, "19:19:19:19:19:19"));
-        devices.add(new BTDevice("Комната 20", true, "20:20:20:20:20:20"));
+        devices.add(new BTDevice(devices.size(), "Комната 1", true, "1D:1D:1D:1D:1D:1D"));
+        devices.add(new BTDevice(devices.size(), "Комната 2", true, "2E:2E:2E:2E:2E:2E"));
+        devices.add(new BTDevice(devices.size(), "Комната 3", true, "3C:3C:3C:3C:3C:3C"));
+        devices.add(new BTDevice(devices.size(), "Комната 4", true, "4A:4A:4A:4A:4A:4A"));
+        devices.add(new BTDevice(devices.size(), "Комната 5", true, "5B:5B:5B:5B:5B:5B"));
+        devices.add(new BTDevice(devices.size(), "Комната 6", true, "6F:6F:6F:6F:6F:6F"));
+        devices.add(new BTDevice(devices.size(), "Комната 7", true, "7E:7E:7E:7E:7E:7E"));
+        devices.add(new BTDevice(devices.size(), "Комната 8", true, "8C:8C:8C:8C:8C:8C"));
+        devices.add(new BTDevice(devices.size(), "Комната 9", true, "9A:9A:9A:9A:9A:9A"));
+        devices.add(new BTDevice(devices.size(), "Комната 10", true, "10:10:10:10:10:10"));
+        devices.add(new BTDevice(devices.size(), "Комната 11", true, "11:11:11:11:11:11"));
+        devices.add(new BTDevice(devices.size(), "Комната 12", true, "12:12:12:12:12:12"));
+        devices.add(new BTDevice(devices.size(), "Комната 13", true, "13:13:13:13:13:13"));
+        devices.add(new BTDevice(devices.size(), "Комната 14", true, "14:14:14:14:14:14"));
+        devices.add(new BTDevice(devices.size(), "Комната 15", true, "15:15:15:15:15:15"));
+        devices.add(new BTDevice(devices.size(), "Комната 16", true, "16:16:16:16:16:16"));
+        devices.add(new BTDevice(devices.size(), "Комната 17", true, "17:17:17:17:17:17"));
+        devices.add(new BTDevice(devices.size(), "Комната 18", true, "18:18:18:18:18:18"));
+        devices.add(new BTDevice(devices.size(), "Комната 19", true, "19:19:19:19:19:19"));
+        devices.add(new BTDevice(devices.size(), "Комната 20", true, "20:20:20:20:20:20"));
     }
 }
